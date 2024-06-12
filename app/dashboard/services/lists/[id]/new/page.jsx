@@ -120,7 +120,7 @@ export default function page({ params }) {
                                   <FormControl>
                                     <Input
                                       name="title"
-                                      className="w-full"
+                                      className="w-full border-primary ring-primary"
                                       placeholder="title"
                                       {...field}
                                     />

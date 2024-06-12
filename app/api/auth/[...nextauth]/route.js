@@ -5,11 +5,13 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/utils/db";
+import { decode, encode } from "next-auth/jwt";
+
+const secret = process.env.NEXTAUTH_SECRET;
 
 export const authOptions = {
   pages: {
     signIn: "/sign-in",
-    error: "/sign-in", // Redirect to sign-in page with an error message
   },
   session: {
     strategy: "jwt",
@@ -17,8 +19,7 @@ export const authOptions = {
     maxAge: 24 * 60 * 60,
   },
   jwt: {
-    secret: process.env.NEXTAUTH_SECRET,
-    maxAge: 60 * 60 * 24 * 30,
+    secret: secret,
   },
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -38,7 +39,14 @@ export const authOptions = {
           });
 
           if (!user) {
-            throw new Error("User not found");
+            const hashPassword = bcrypt.hashSync(password, 10);
+            await prisma.user.create({
+              data: {
+                username: username,
+                password: hashPassword,
+              },
+            });
+            return;
           }
 
           const passwordMatch = await VerifyPassword(password, user.password);
@@ -60,7 +68,7 @@ export const authOptions = {
       if (user) {
         token.id = user.id;
         token.username = user.username;
-        token.jti = crypto.randomUUID() // Create a unique identifier for the session
+        token.jti = crypto.randomUUID(); // Create a unique identifier for the session
       }
       return token;
     },

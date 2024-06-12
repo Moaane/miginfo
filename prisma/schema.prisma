@@ -17,12 +17,25 @@ model Role {
   id   String @id @default(cuid())
   name String
 
-  users User[]
+  users       User[]
+  permissions Permission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id     String  @id @default(cuid())
+  name   String
+  roleId String?
+
+  Role Role? @relation(fields: [roleId], references: [id])
+
+  @@map("permissions")
 }
 
 model User {
   id       String  @id @default(cuid())
-  username String? @unique
+  username String  @unique
   password String
   roleId   String? @map("role_id")
 
@@ -60,22 +73,21 @@ model Category {
   type CategoryTypes
 
   serviceCategories ServiceCategory[]
-  CategoryPartner   CategoryPartner[]
+  partnerCategories PartnerCategory[]
   clientCategories  ClientCategory[]
-  NewsCategories    NewsCategory[]
-  EventCategory     EventCategory[]
+  newsCategorries   NewsCategory[]
+  eventCategories   EventCategory[]
 }
 
 model Service {
-  id           String  @id @default(cuid())
-  name         String
-  description  String
-  slug         String  @unique
-  imgUrl       String  @map("img_url")
-  iconUrl      String? @map("icon_url")
-  whiteIconUrl String? @map("white_icon_url")
-  onSection    Boolean @default(false) @map("on_section")
-  status       Boolean
+  id          String  @id @default(cuid())
+  name        String
+  description String
+  slug        String  @unique
+  image       Json?
+  icon        Json?
+  onSection   Boolean @default(false) @map("on_section")
+  status      Boolean
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
@@ -88,7 +100,7 @@ model Service {
 
 model ServiceList {
   id        String  @id @default(cuid())
-  title     String
+  name      String
   order     Int
   serviceId String? @map("service_id")
 
@@ -110,19 +122,19 @@ model ServiceCategory {
 }
 
 model Partner {
-  id      String @id @default(cuid())
-  name    String
-  logoUrl String @map("logo_url")
+  id    String @id @default(cuid())
+  name  String
+  image Json?
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
-  categoryPartners CategoryPartner[]
+  partnerCategories PartnerCategory[]
 
   @@map("partners")
 }
 
-model CategoryPartner {
+model PartnerCategory {
   partnerId  String
   categoryId String
 
@@ -135,9 +147,9 @@ model CategoryPartner {
 }
 
 model Client {
-  id      String @id @default(cuid())
-  name    String
-  logoUrl String @map("logo_url")
+  id    String @id @default(cuid())
+  name  String
+  image Json?
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
@@ -149,13 +161,13 @@ model Client {
 
 model ClientCategory {
   clientId   String @map("client_id")
-  categoryid String @map("category_id")
+  categoryId String @map("category_id")
 
   clients    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  categories Category @relation(fields: [categoryid], references: [id], onDelete: Cascade)
+  categories Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  @@id([clientId, categoryid])
-  @@unique([clientId, categoryid])
+  @@id([clientId, categoryId])
+  @@unique([clientId, categoryId])
   @@map("client_categories")
 }
 
@@ -168,7 +180,7 @@ model News {
   id          String    @id @default(cuid())
   title       String
   description String
-  imgUrl      String    @map("img_url")
+  image       Json?
   userId      String    @map("user_id")
   type        NewsTypes @default(NEWS)
 
@@ -176,8 +188,8 @@ model News {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
-  newsCategories NewsCategory[]
-  EventCategory  EventCategory[]
+  newsCategories  NewsCategory[]
+  eventCategories EventCategory[]
 
   @@map("news")
 }
@@ -195,27 +207,75 @@ model NewsCategory {
 }
 
 model EventCategory {
-  newsId     String @map("news_id")
+  eventId    String @map("news_id")
   categoryId String @map("category_id")
 
-  news       News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  events     News     @relation(fields: [eventId], references: [id], onDelete: Cascade)
   categories Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  @@id([newsId, categoryId])
-  @@unique([newsId, categoryId])
+  @@id([eventId, categoryId])
+  @@unique([eventId, categoryId])
   @@map("event_categories")
 }
 
 model Portofolio {
-  id String @id @default(cuid())
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  imageUrl String?
+
+  @@map("portofolios")
 }
 
-model Section {
-  id    String @id @default(cuid())
-  name  String
-  order Int
+model Carousel {
+  id     String  @id @default(cuid())
+  title  String
+  image  Json?
+  status Boolean @default(true)
+
+  @@map("caraousel")
 }
 
-model UserComponentReference {
-  id String @id @default(cuid())
+model Team {
+  id       String  @id @default(cuid())
+  name     String
+  position String
+  order    Int
+  image    Json?
+  twitter  String?
+  facebook String?
+  email    String?
+  linkedin String?
+
+  @@map("teams")
+}
+
+model ServicePage {
+  id          String  @id @default(cuid())
+  title       String
+  description String  @db.Text
+  image       Json?
+  direction   String
+  head        Boolean @default(false)
+
+  @@map("service_pages")
+}
+
+model AboutPage {
+  id          String  @id @default(cuid())
+  title       String
+  description String  @db.Text
+  image       Json?
+  direction   String
+  head        Boolean @default(false)
+
+  @@map("about_pages")
+}
+
+model NewsPage {
+  id          String @id @default(cuid())
+  title       String
+  description String @db.Text
+
+  @@map("news_pages")
 }

@@ -1,11 +1,5 @@
 "use client";
-import React, { useRef } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/effect-creative";
-// import { EffectCreative, Autoplay } from " swiper/modules";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import React, { useEffect } from "react";
 import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
@@ -14,6 +8,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Aos from "aos";
+import "aos/dist/aos.css";
 
 const carousels = [
   {
@@ -31,34 +27,44 @@ const carousels = [
 ];
 
 export default function ImageCarouselSection() {
-  const container = useRef(null);
-  const plugin = useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: false, loop: true })
-  );
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".cs",
-        { x: -500, opacity: 0 },
-        { x: 0, opacity: 1, ease: "power1.inOut", duration: 1 }
-      );
-    },
-    { scope: container }
-  );
+  useEffect(() => {
+    Aos.init({
+      startEvent: "DOMContentLoaded",
+      animatedClassName: "aos-animate",
+      useClassNames: true,
+      easing: "ease-out-cubic",
+    });
+  });
 
   return (
-    <div ref={container}>
+    <>
       <Carousel
+        data-aos="slide-right"
+        data-aos-duration="1200"
         opts={{
+          duration: 60,
           loop: true,
+          direction: "right",
         }}
-        plugins={[plugin.current]}
-        className="w-full h-screen bg-red-100 cs"
-        onMouseEnter={plugin.current.stop}
-        onMouseLeave={plugin.current.reset}
+        plugins={[
+          Autoplay({
+            delay: 10000,
+            loop: true,
+            stopOnInteraction: false,
+            stopOnFocusIn: false,
+            stopOnMouseEnter: false,
+            stopOnLastSnap: false,
+          }),
+        ]}
+        className="w-full relative h-screen bg-white cs"
       >
         <CarouselContent>
+          <CarouselItem>
+            <video autoPlay loop muted className="w-full h-full max-h-screen max-w-none ">
+              <source src="/video/video-hero.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </CarouselItem>
           {carousels?.map((carousel, index) => (
             <CarouselItem key={index}>
               <div
@@ -66,7 +72,7 @@ export default function ImageCarouselSection() {
                   backgroundImage: `url(/${carousel.imgUrl})`,
                   objectFit: "cover",
                 }}
-                className="h-screen text-black bg-cover object-center"
+                className="text-black bg-cover object-center"
               >
                 <div className="flex h-screen backdrop-brightness-50 bg-white/30 bg-opacity-60 justify-center items-center text-center text-neutral-content">
                   <div className="max-w-md">
@@ -82,6 +88,6 @@ export default function ImageCarouselSection() {
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
-    </div>
+    </>
   );
 }

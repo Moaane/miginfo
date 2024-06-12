@@ -32,6 +32,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Loader from "@/components/loader/Loader";
+import { Loader2 } from "lucide-react";
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -48,6 +49,17 @@ const formSchema = z.object({
   category: z.string().min(1, "Category is required"),
   onSection: z.boolean({ required_error: "On section status is required" }),
   status: z.boolean({ required_error: "Publish status is required" }),
+  icon: z
+    .any()
+    .optional()
+    .refine((icon) => {
+      if (!icon || icon.length === 0) return true;
+      return icon[0]?.size <= MAX_FILE_SIZE;
+    }, `Max icon size is 5MB.`)
+    .refine((icon) => {
+      if (!icon || icon.length === 0) return true;
+      return ACCEPTED_IMAGE_TYPES.includes(icon[0]?.type);
+    }, "Only .jpg, .jpeg, .png and .webp formats are supported."),
   image: z
     .any()
     .optional()
@@ -59,11 +71,14 @@ const formSchema = z.object({
       if (!image || image.length === 0) return true;
       return ACCEPTED_IMAGE_TYPES.includes(image[0]?.type);
     }, "Only .jpg, .jpeg, .png and .webp formats are supported."),
+  imageName: z.string().optional(),
 });
 
 export default function page({ params }) {
   const { id } = params;
   const [loading, setLoading] = useState(true);
+  const [previewIconUrl, setPreivewIconUrl] = useState(null);
+  const [updatedPreviewIconUrl, setUpdatedPreviewIconUrl] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [updatedPreviewUrl, setUpdatedPreviewUrl] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -81,16 +96,20 @@ export default function page({ params }) {
       slug: "",
       description: "",
       category: "",
+      icon: "",
       image: "",
-      icons: "",
+      imageName: "",
     },
   });
 
   const imageRef = form.register("image");
   const watchedImage = form.watch("image");
+  const iconRef = form.register("icon");
+  const watchedIcon = form.watch("icon");
 
   async function onSubmit(data) {
     try {
+      setLoading(true);
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("slug", data.slug);
@@ -98,34 +117,37 @@ export default function page({ params }) {
       formData.append("category", data.category);
       formData.append("onSection", data.onSection);
       formData.append("status", data.status);
-      if (updatedPreviewUrl != null) {
-        formData.append("image", data.image[0]);
-      } else {
-        formData.append("image", null);
-      }
+      formData.append("icon", data.icon[0]);
+      formData.append("image", data.image[0]);
+      formData.append("imageName", data.imageName);
 
-      console.log(formData);
-      console.log(id);
-
-      const res = await fetch(`../../../api/services/${id}`, {
-        method: "PATCH",
+      const response = await fetch(`../../../api/services/${id}`, {
+        method: "PUT",
         body: formData,
       });
+      console.log(response);
 
-      console.log(res);
+      const result = await response.json();
 
-      if (res.ok) {
+      if (result.status === 200) {
         router.back();
       }
+
     } catch (error) {
       console.log("Error while creating service : ", error);
+    } finally {
+      setLoading(false);
     }
   }
 
   async function fetchService(id) {
     try {
-      const res = await fetch(`../../../api/services/${id}`, { method: "GET" });
-      const result = await res.json();
+      setLoading(true);
+      const response = await fetch(`../../../api/services/${id}`, {
+        method: "GET",
+      });
+
+      const result = await response.json();
 
       const categoryId = result.data.serviceCategories?.[0]?.categoryId;
       const categoryName = result.data.serviceCategories?.[0]?.categories?.name;
@@ -134,31 +156,42 @@ export default function page({ params }) {
       form.setValue("title", result.data.name);
       form.setValue("slug", result.data.slug);
       form.setValue("description", result.data.description);
-      form.setValue("category", categoryId);
+      if (categoryId) form.setValue("category", categoryId);
       form.setValue("status", result.data.status);
       form.setValue("onSection", result.data.onSection);
+      form.setValue("imageName", result.data.image.name);
 
-      setPreviewUrl(result.data.imgUrl);
+      setPreivewIconUrl(result.data.icon.filename);
+      setPreviewUrl(result.data.image.filename);
       fetchCategories(categoryId);
     } catch (error) {
       console.log("Error while getting service : ", error);
+    } finally {
+      setLoading(false);
     }
   }
 
   async function fetchCategories(categoryId) {
     try {
-      const res = await fetch("/api/category?type=service", {
+      setLoading(true);
+      const response = await fetch("../../../api/categories?filter=service", {
         method: "GET",
       });
-      const result = await res.json();
+      const result = await response.json();
+
       let categories = result.data;
 
-      const specificCategoryIndex = categories.findIndex(
-        (cat) => cat.id === categoryId
-      );
-      if (specificCategoryIndex !== -1) {
-        const [specificCategory] = categories.splice(specificCategoryIndex, 1);
-        categories = [specificCategory, ...categories];
+      if (categoryId) {
+        const specificCategoryIndex = categories.findIndex(
+          (cat) => cat.id === categoryId
+        );
+        if (specificCategoryIndex !== -1) {
+          const [specificCategory] = categories.splice(
+            specificCategoryIndex,
+            1
+          );
+          categories = [specificCategory, ...categories];
+        }
       }
 
       setCategories(categories);
@@ -173,16 +206,24 @@ export default function page({ params }) {
     fetchService(id);
   }, [id]);
 
-  useEffect(() => {
-    if (watchedImage && watchedImage.length > 0) {
-      const image = watchedImage[0];
+  const setPreview = (files, setPreviewUrl) => {
+    if (files && files.length > 0) {
+      const file = files[0];
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUpdatedPreviewUrl(reader.result);
+        setPreviewUrl(reader.result);
       };
-      reader.readAsDataURL(image);
+      reader.readAsDataURL(file);
     }
+  };
+
+  useEffect(() => {
+    setPreview(watchedImage, setUpdatedPreviewUrl);
   }, [watchedImage]);
+
+  useEffect(() => {
+    setPreview(watchedIcon, setUpdatedPreviewIconUrl);
+  }, [watchedIcon]);
 
   return (
     <>
@@ -205,9 +246,16 @@ export default function page({ params }) {
                     New Services
                   </h1>
                   <div className="hidden items-center gap-2 md:ml-auto md:flex">
-                    <Button variant="primary" size="sm">
-                      Save Product
-                    </Button>
+                    {loading ? (
+                      <Button variant="primary" size="sm">
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Save Product
+                      </Button>
+                    ) : (
+                      <Button variant="primary" size="sm">
+                        Save Product
+                      </Button>
+                    )}
                   </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
@@ -215,9 +263,9 @@ export default function page({ params }) {
                     <Card x-chunk="dashboard-07-chunk-0">
                       <CardHeader>
                         <CardTitle>Service Details</CardTitle>
-                        <CardDescription>
+                        {/* <CardDescription>
                           Lipsum dolor sit amet, consectetur adipiscing elit
-                        </CardDescription>
+                        </CardDescription> */}
                       </CardHeader>
                       <CardContent>
                         <div className="grid gap-6">
@@ -247,7 +295,10 @@ export default function page({ params }) {
                               name="slug"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Slug</FormLabel>
+                                  <FormLabel>
+                                    Slug (optional) if blank will use from the
+                                    title instead
+                                  </FormLabel>
                                   <FormControl>
                                     <Input
                                       id="slug"
@@ -342,7 +393,7 @@ export default function page({ params }) {
                               name="onSection"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>On Section</FormLabel>
+                                  <FormLabel>Display On Section</FormLabel>
                                   <Select
                                     onValueChange={(value) =>
                                       field.onChange(value === "true")
@@ -373,7 +424,7 @@ export default function page({ params }) {
                               name="status"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Publish</FormLabel>
+                                  <FormLabel>Published</FormLabel>
                                   <Select
                                     onValueChange={(value) =>
                                       field.onChange(value === "true")
@@ -402,65 +453,51 @@ export default function page({ params }) {
                       </CardContent>
                     </Card>
                     <Card
-                      className="overflow-hidden"
+                      className="overflow-hidden mb-6"
                       x-chunk="dashboard-07-chunk-4"
                     >
                       <CardHeader>
-                        <CardTitle>Product Images</CardTitle>
+                        <CardTitle>Icon Image (optional)</CardTitle>
                         <CardDescription>
-                          Lipsum dolor sit amet, consectetur adipiscing elit
+                          Icon image will used on display section, and the icon
+                          must be white color
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
-                        <div className="grid gap-2">
-                          <div className="grid grid-cols-2 gap-2">
-                            <button>
-                              <Image
-                                alt="Product image"
-                                className="aspect-square w-full rounded-md object-cover"
-                                height="84"
-                                src="/img_holder.png"
-                                width="84"
-                              />
-                            </button>
-                            <button>
-                              <Image
-                                alt="Product image"
-                                className="aspect-square w-full rounded-md object-cover"
-                                height="84"
-                                src="/img_holder.png"
-                                width="84"
-                              />
-                            </button>
-                          </div>
-                          {/* <FormField
+                      <FormField
                         className="col-span-3 w-full"
                         control={form.control}
-                        name="files"
+                        name="icon"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Picture</FormLabel>
-                            <FormControl>
-                              <Input
-                                // onChange={(e) => {
-                                //   field.onChange(e); // Memperbarui nilai field saat ada perubahan
-                                //   handleImageChange(e); // Menampilkan pratinjau gambar
-                                // }}
-                                id="file"
-                                type="file"
-                                accept="image/jpeg,image/png,image/jpg"
-                                
-                                {...fileRef}
-                              />
-                            </FormControl>
-                            <FormMessage />
+                            <CardContent>
+                              <div className="grid gap-2">
+                                <Image
+                                  alt="Icon Image"
+                                  className="aspect-square w-full rounded-md object-contain"
+                                  height="300"
+                                  src={
+                                    updatedPreviewIconUrl
+                                      ? updatedPreviewIconUrl
+                                      : previewIconUrl
+                                      ? `/api/images/${previewIconUrl}`
+                                      : "/img_holder.png"
+                                  }
+                                  width="300"
+                                />
+                                <FormControl>
+                                  <Input
+                                    id="icon"
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/jpg"
+                                    {...iconRef}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </div>
+                            </CardContent>
                           </FormItem>
                         )}
-                      /> */}
-                          {/* <Upload className="h-4 w-4 text-muted-foreground" />
-                          <span className="sr-only">Upload</span> */}
-                        </div>
-                      </CardContent>
+                      />
                     </Card>
                     <Card
                       className="overflow-hidden mb-6"
@@ -473,22 +510,21 @@ export default function page({ params }) {
                         render={({ field }) => (
                           <FormItem>
                             <CardHeader>
-                              <CardTitle>Product Images</CardTitle>
+                              <CardTitle>Service Image</CardTitle>
                               <CardDescription>
-                                Lipsum dolor sit amet, consectetur adipiscing
-                                elit
+                                Service image will be used on service pages
                               </CardDescription>
                             </CardHeader>
                             <CardContent>
                               <div className="grid gap-2">
                                 <Image
                                   alt="Product image"
-                                  className="aspect-square w-full rounded-md object-cover"
+                                  className="aspect-square w-full rounded-md object-contain"
                                   height="300"
                                   src={
                                     updatedPreviewUrl
                                       ? updatedPreviewUrl
-                                      : `/uploads${previewUrl}`
+                                      : `/api/images/${previewUrl}`
                                   }
                                   width="300"
                                   priority
@@ -508,6 +544,28 @@ export default function page({ params }) {
                           </FormItem>
                         )}
                       />
+                      <div className="grid gap-2">
+                        <FormField
+                          control={form.control}
+                          name="imageName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <CardContent>
+                                <FormLabel>Image Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    name="imageName"
+                                    className="w-full"
+                                    placeholder="image name"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </CardContent>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </Card>
                   </div>
                 </div>

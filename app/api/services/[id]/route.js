@@ -3,30 +3,10 @@ import { getServerSession } from "next-auth";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import path from "path";
-import { writeFile } from "fs/promises";
-import { v4 as uuidv4 } from "uuid";
+import { CreateImage } from "../../images/route";
 
 export async function GET(req, { params }) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
   const { id } = params;
-
-  if (!token) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to get categories",
-    });
-  }
-
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to get categories",
-    });
-  }
 
   try {
     const service = await prisma.service.findUnique({
@@ -41,37 +21,18 @@ export async function GET(req, { params }) {
     return NextResponse.json({
       data: service,
       status: 200,
-      message: "Successfully fetch service",
+      message: "Successfully getting service",
     });
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Failed while fething service",
+      message: "Failed while getting service",
     });
   }
 }
 
-export async function PATCH(req, { params }) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
+export async function PUT(req, { params }) {
   const { id } = params;
-
-  if (!token) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to get categories",
-    });
-  }
-
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to get categories",
-    });
-  }
-
   const formData = await req.formData();
   const name = formData.get("title");
   const slug = formData.get("slug");
@@ -80,77 +41,67 @@ export async function PATCH(req, { params }) {
   const onSection = formData.get("onSection") === "true";
   const status = formData.get("status") === "true";
   const image = formData.get("image");
-
-  if (image != null && image instanceof Blob) {
-    const buffer = Buffer.from(await image.arrayBuffer());
-    const sanitizedTitle = name
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9\-]/g, "");
-    const extension = path.extname(image.name);
-    const uniqueSuffix = `-${uuidv4()}`;
-    const imageName = `${sanitizedTitle}${uniqueSuffix}${extension}`;
-    const imagePath = path.join(
-      process.cwd(),
-      "public/uploads/services",
-      imageName
-    );
-    const imgUrl = `/services/${imageName}`;
-
-    try {
-      await writeFile(imagePath, buffer);
-      const updatedService = await prisma.service.update({
-        where: { id },
-        data: {
-          name: name,
-          slug: slug,
-          description: description,
-          onSection,
-          status,
-          imgUrl,
-          serviceCategories: {
-            updateMany: {
-              where: { serviceId: id },
-              data: { categoryId: categoryId },
-            },
-          },
-        },
-        include: {
-          serviceCategories: true,
-        },
-      });
-
-      return NextResponse.json({
-        data: updatedService,
-        status: 200,
-        message: "Service updated successfully",
-      });
-    } catch (error) {
-      return NextResponse.json({
-        status: 500,
-        message: "Error while updating service",
-      });
-    }
-  }
+  const icon = formData.get("icon");
+  let imageName = formData.get("imageName");
+  const iconName = `${imageName}-icon`;
 
   try {
+    const existingService = await prisma.service.findUnique({
+      where: { slug },
+    });
+
+    if (existingService && existingService.id !== id) {
+      return NextResponse.json({
+        status: 400,
+        message: "Slug is already in use",
+      });
+    }
+
+    const serviceCategories = await prisma.serviceCategory.findFirst({
+      where: { serviceId: id },
+    });
+
+    if (!serviceCategories) {
+      await prisma.serviceCategory.create({
+        data: { serviceId: id, categoryId },
+      });
+    }
+
+    const imageData =
+      image && image instanceof Blob
+        ? existingService.image
+          ? await updateImage(existingService.image.filename, image, imageName)
+          : await CreateImage(image, imageName)
+        : existingService.image
+        ? imageName !== existingService.image.name
+          ? await renameImage(existingService.image.filename, imageName)
+          : existingService.image
+        : null;
+
+    const iconData =
+      icon && icon instanceof Blob
+        ? existingService.icon
+          ? await updateImage(existingService.icon.filename, icon, iconName)
+          : await CreateImage(icon, iconName)
+        : existingService.icon
+        ? iconName !== existingService.icon.name
+          ? await renameImage(existingService.icon.filename, iconName)
+          : existingService.icon
+        : null;
+
     const updatedService = await prisma.service.update({
-      where: { id },
+      where: { id: id },
       data: {
         name: name,
         slug: slug,
+        image: imageData,
+        icon: iconData,
         description: description,
-        onSection,
-        status,
+        onSection: onSection,
+        status: status,
         serviceCategories: {
-          updateMany: {
-            where: { serviceId: id },
-            data: { categoryId: categoryId },
-          },
+          updateMany: { where: { serviceId: id }, data: { categoryId } },
         },
-      },
-      include: {
-        serviceCategories: true,
       },
     });
 
@@ -160,6 +111,7 @@ export async function PATCH(req, { params }) {
       message: "Service updated successfully",
     });
   } catch (error) {
+    console.error("Error updating service:", error);
     return NextResponse.json({
       status: 500,
       message: "Error while updating service",
@@ -168,9 +120,45 @@ export async function PATCH(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
   const { id } = params;
+
+  if (!token) {
+    return NextResponse.json({
+      status: 401,
+      message: "Unauthorized to delete service",
+    });
+  }
+
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return NextResponse.json({
+      status: 401,
+      message: "Unauthorized to delete service",
+    });
+  }
+
   try {
-    await prisma.service.delete({ where: { id } });
+    const deleteImage = async (oldFilename) => {
+      await fetch(`${process.env.BASE_URL}/api/images/${oldFilename}`, {
+        method: "DELETE",
+      });
+    };
+
+    const deletedService = await prisma.service.delete({ where: { id } });
+    const deletedLists = await prisma.serviceList.deleteMany({
+      where: { serviceId: deletedService.id },
+    });
+
+    if (deletedService.icon) {
+      await deleteImage(deletedService.icon.filename);
+    }
+
+    if (deletedService.image) {
+      await deleteImage(deletedService.image.filename);
+    }
 
     return NextResponse.json({
       status: 200,

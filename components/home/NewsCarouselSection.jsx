@@ -1,16 +1,13 @@
 "use client";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/all";
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Badge } from "../ui/badge";
+import Aos from "aos";
+import "aos/dist/aos.css";
 
 const news = [
   {
@@ -52,47 +49,39 @@ const news = [
 ];
 
 export default function NewsCarouselSection() {
-  const container = useRef(null);
-  useLayoutEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+  useEffect(() => {
+    Aos.init({
+      startEvent: "DOMContentLoaded",
+      animatedClassName: "aos-animate",
+      useClassNames: true,
+      easing: "ease-out-cubic",
+    });
   });
 
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".n",
-        { y: 500, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.2,
-          duration: 10,
-          scrollTrigger: {
-            once: true,
-            trigger: ".news",
-            start: "top bottom",
-            end: "center bottom ",
-            scrub: 2, // Lower scrub value for more immediate scroll response
-          },
-        }
-      );
-    },
-    { scope: container }
-  );
   return (
-    <div ref={container}>
-      <div className="bg-white news flex justify-center items-center lg:min-h-[600px] text-black md:mt-8">
-        <div className="flex-col w-full h-full justify-items-center justify-center items-center max-w-7xl space-y-16">
+    <>
+      <div
+        data-aos="fade-up"
+        data-aos-offset="200"
+        data-aos-duration="600"
+        className="bg-white aos-animate flex justify-center items-center lg:min-h-[600px] text-black md:mt-8 px-4 lg:px-8 xl:px-20"
+      >
+        <div className="flex-col w-full h-full justify-items-center justify-center items-center max-w-7xl space-y-8 lg:space-y-16">
           <h1 className="n text-2xl md:text-4xl text-center font-semibold">
             Recent News & Events
           </h1>
 
-          <Carousel
-            className="px-4 lg:px-8 xl:px-0"
-          >
+          <Carousel opts={{}} className="px-4 lg:px-8 xl:px-0">
             <CarouselContent>
               {news.map((news, index) => (
-                <CarouselItem key={index} className="lg:basis-1/3 n">
+                <CarouselItem
+                  key={index}
+                  data-aos="fade-up"
+                  data-aos-offset="200"
+                  data-aos-delay={`${index * 250}`}
+                  data-aos-duration={`${750 / index}`}
+                  className="n lg:basis-1/3 n max-w-sm"
+                >
                   <figure>
                     <img src={`/${news.imgUrl}`} alt="Shoes" />
                   </figure>
@@ -100,9 +89,7 @@ export default function NewsCarouselSection() {
                     <h2 className="card-title text-base font-medium">
                       {news.title}
                     </h2>
-                    <div className="card-actions justify-end">
-                      <Badge className="bg-primary">{news.category}</Badge>
-                    </div>
+                    <Badge className="bg-primary">{news.category}</Badge>
                   </div>
                 </CarouselItem>
               ))}
@@ -110,6 +97,6 @@ export default function NewsCarouselSection() {
           </Carousel>
         </div>
       </div>
-    </div>
+    </>
   );
 }

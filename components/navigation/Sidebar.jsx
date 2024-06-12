@@ -48,6 +48,8 @@ import {
 } from "../ui/collapsible";
 import { ArrowDown } from "lucide-react";
 import { Toggle } from "../ui/toggle";
+import { Boxes } from "lucide-react";
+import { GalleryThumbnails } from "lucide-react";
 
 const variantButton = {
   full: {
@@ -55,10 +57,16 @@ const variantButton = {
       "flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary",
     default:
       "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+    disabled:
+      "flex disabled items-center gap-3 rounded-lg bg-muted px-3 py-2 text-black line-through transition-all",
   },
   small: {
-    active: {},
-    default: {},
+    active:
+      "mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-primary hover:text-foreground",
+    default:
+      "mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-primary",
+    disabled:
+      "mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground line-through",
   },
 };
 
@@ -89,44 +97,32 @@ export default function Sidebar({ children }) {
                 <Home className="h-4 w-4" />
                 Dashboard
               </Link>
-              <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-                <CollapsibleTrigger asChild>
-                  <Link
-                    href="/dashboard/services"
-                    className={
-                      pathname === "/dashboard/services"
-                        ? variantButton.full.active
-                        : variantButton.full.default
-                    }
-                  >
-                    <HandHeart className="h-4 w-4" />
-                    Services
-                    {/* <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                  6
-                </Badge> */}
-                  </Link>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <Link
-                    href="/dashboard/services/lists"
-                    className={
-                      pathname === "/dashboard/services/lists"
-                        ? variantButton.full.active
-                        : variantButton.full.default
-                    }
-                  >
-                    <HandHeart className="h-4 w-4" />
-                    Service Lists
-                    {/* <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                  6
-                </Badge> */}
-                  </Link>
-                </CollapsibleContent>
-              </Collapsible>
               <Link
-                href="dashboard/news"
+                href="/dashboard/services"
                 className={
-                  pathname === "/dashboard/news"
+                  pathname.startsWith("/dashboard/services")
+                    ? variantButton.full.active
+                    : variantButton.full.default
+                }
+              >
+                <HandHeart className="h-4 w-4" />
+                Services
+              </Link>
+              <Link
+                href="/dashboard/categories"
+                className={
+                  pathname.startsWith("/dashboard/categories")
+                    ? variantButton.full.active
+                    : variantButton.full.default
+                }
+              >
+                <Boxes className="h-4 w-4" />
+                Categories
+              </Link>
+              <Link
+                href="/dashboard/news"
+                className={
+                  pathname.startsWith("/dashboard/news")
                     ? variantButton.full.active
                     : variantButton.full.default
                 }
@@ -135,9 +131,9 @@ export default function Sidebar({ children }) {
                 News
               </Link>
               <Link
-                href="dashboard/events"
+                href="/dashboard/events"
                 className={
-                  pathname === "/dashboard/events"
+                  pathname.startsWith("/dashboard/events")
                     ? variantButton.full.active
                     : variantButton.full.default
                 }
@@ -146,9 +142,9 @@ export default function Sidebar({ children }) {
                 Events
               </Link>
               <Link
-                href="dashboard/clients"
+                href="/dashboard/clients"
                 className={
-                  pathname === "/dashboard/clients"
+                  pathname.startsWith("/dashboard/clients")
                     ? variantButton.full.active
                     : variantButton.full.default
                 }
@@ -157,9 +153,9 @@ export default function Sidebar({ children }) {
                 Clients
               </Link>
               <Link
-                href="dashboard/partners"
+                href="/dashboard/partners"
                 className={
-                  pathname === "/dashboard/services"
+                  pathname.startsWith("/dashboard/partners")
                     ? variantButton.full.active
                     : variantButton.full.default
                 }
@@ -168,26 +164,72 @@ export default function Sidebar({ children }) {
                 Partners
               </Link>
               <Link
-                href="dashboard/careers"
-                className={
-                  pathname === "/dashboard/services"
-                    ? variantButton.full.active
-                    : variantButton.full.default
-                }
+                href=""
+                className={variantButton.full.disabled}
+                // className={
+                //   pathname === "/dashboard/services"
+                //     ? variantButton.full.active
+                //     : variantButton.full.default
+                // }
               >
                 <BriefcaseBusiness className="h-4 w-4" />
                 Careers
               </Link>
               <Link
-                href="dashboard/portofolios"
+                href=""
+                className={variantButton.full.disabled}
+                // className={
+                //   pathname === "/dashboard/services"
+                //     ? variantButton.full.active
+                //     : variantButton.full.default
+                // }
+              >
+                <FileText className="h-4 w-4" />
+                Portofolios
+              </Link>
+              <Link
+                href="/dashboard/carousels"
                 className={
-                  pathname === "/dashboard/portofolios"
+                  pathname.startsWith("/dashboard/carousels")
                     ? variantButton.full.active
                     : variantButton.full.default
                 }
               >
+                <GalleryThumbnails className="h-4 w-4" />
+                Carousels
+              </Link>
+              <Link
+                href="/dashboard/teams"
+                className={
+                  pathname.startsWith("/dashboard/teams")
+                    ? variantButton.full.active
+                    : variantButton.full.default
+                }
+              >
+                <Users className="h-4 w-4" />
+                Teams
+              </Link>
+              {/* <Link
+                href="dashboard/portofolios"
+                className={
+                  pathname === "/dashboard/portofolios"
+                  ? variantButton.full.active
+                  : variantButton.full.default
+                }
+                >
                 <FileText className="h-4 w-4" />
                 Portofolios
+              </Link> */}
+              <Link
+                href="/dashboard/settings"
+                className={
+                  pathname.startsWith("/dashboard/settings")
+                    ? variantButton.full.active
+                    : variantButton.full.default
+                }
+              >
+                <Handshake className="h-4 w-4" />
+                Settings
               </Link>
             </nav>
           </div>
@@ -209,49 +251,127 @@ export default function Sidebar({ children }) {
             <SheetContent side="left" className="flex flex-col">
               <nav className="grid gap-2 text-lg font-medium">
                 <Link
-                  href="#"
-                  className="flex items-center gap-2 text-lg font-semibold"
+                  href="/dashboard"
+                  className={
+                    pathname === "/dashboard"
+                      ? variantButton.small.active
+                      : variantButton.small.default
+                  }
                 >
-                  <Package2 className="h-6 w-6" />
-                  <span className="sr-only">Acme Inc</span>
-                </Link>
-                <Link
-                  href="#"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                  <Home className="h-5 w-5" />
+                  <Home className="h-4 w-4" />
                   Dashboard
                 </Link>
                 <Link
-                  href="#"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
+                  href="/dashboard/services"
+                  className={
+                    pathname.startsWith("/dashboard/services")
+                      ? variantButton.small.active
+                      : variantButton.small.default
+                  }
                 >
-                  <ShoppingCart className="h-5 w-5" />
-                  Orders
-                  <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                    6
-                  </Badge>
+                  <HandHeart className="h-4 w-4" />
+                  Services
                 </Link>
                 <Link
-                  href="#"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                  href="/dashboard/categories"
+                  className={
+                    pathname.startsWith("/dashboard/categories")
+                      ? variantButton.small.active
+                      : variantButton.small.default
+                  }
                 >
-                  <Package className="h-5 w-5" />
-                  Products
+                  <Boxes className="h-4 w-4" />
+                  Categories
                 </Link>
                 <Link
-                  href="#"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                  href="/dashboard/news"
+                  className={
+                    pathname.startsWith("/dashboard/news")
+                      ? variantButton.small.active
+                      : variantButton.small.default
+                  }
                 >
-                  <Users className="h-5 w-5" />
-                  Customers
+                  <Newspaper className="h-4 w-4" />
+                  News
                 </Link>
                 <Link
-                  href="#"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                  href="/dashboard/events"
+                  className={
+                    pathname.startsWith("/dashboard/events")
+                      ? variantButton.small.active
+                      : variantButton.small.default
+                  }
                 >
-                  <LineChart className="h-5 w-5" />
-                  Analytics
+                  <Ticket className="h-4 w-4" />
+                  Events
+                </Link>
+                <Link
+                  href="/dashboard/clients"
+                  className={
+                    pathname.startsWith("/dashboard/clients")
+                      ? variantButton.small.active
+                      : variantButton.small.default
+                  }
+                >
+                  <User className="h-4 w-4" />
+                  Clients
+                </Link>
+                <Link
+                  href="/dashboard/partners"
+                  className={
+                    pathname.startsWith("/dashboard/partners")
+                      ? variantButton.small.active
+                      : variantButton.small.default
+                  }
+                >
+                  <Handshake className="h-4 w-4" />
+                  Partners
+                </Link>
+                <Link
+                  href=""
+                  className={variantButton.small.disabled}
+                  // className={
+                  //   pathname === "/dashboard/services"
+                  //     ? variantButton.small.active
+                  //     : variantButton.small.default
+                  // }
+                >
+                  <BriefcaseBusiness className="h-4 w-4" />
+                  Careers
+                </Link>
+                <Link
+                  href=""
+                  className={variantButton.small.disabled}
+                  // className={
+                  //   pathname === "/dashboard/services"
+                  //     ? variantButton.small.active
+                  //     : variantButton.small.default
+                  // }
+                >
+                  <FileText className="h-4 w-4" />
+                  Portofolios
+                </Link>
+                {/* <Link
+                href="dashboard/portofolios"
+                className={
+                  pathname === "/dashboard/portofolios"
+                  ? variantButton.small.active
+                  : variantButton.small.default
+                }
+                >
+                <FileText className="h-4 w-4" />
+                Portofolios
+              </Link> */}
+                <Link
+                  href="/dashboard/settings"
+                  className={
+                    pathname.startsWith("/dashboard/settings")
+                      ? variantButton.full.active
+                      : variantButton.full.default
+                  }
+                >
+                  <Handshake className="h-4 w-4" />
+                  Settings
                 </Link>
               </nav>
             </SheetContent>

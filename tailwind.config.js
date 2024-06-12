@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
-import daisyui from "daisyui";
 module.exports = {
+  mode: "jit",
   darkMode: ["class"],
   content: [
     "./pages/**/*.{js,jsx}",
@@ -30,12 +30,23 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "loop-scroll": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-100%)" },
+        },
+        "border-spin": {
+          "100%": {
+            transform: "rotate(-360deg)",
+          },
+        },
       },
       animation: {
+        "loop-scroll": "loop-scroll 50s linear infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "border-spin": "border-spin 7s linear infinite",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [],
 };

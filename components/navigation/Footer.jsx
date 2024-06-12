@@ -1,36 +1,38 @@
-import React from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="sm:relative bottom-0 p-10 bg-primary text-white 2xl:px-60 xl:px-24 lg:px-16 md:px-14 px-4">
-      <aside>
-        <img src="/logo-col-white.png" className="h-24 w-24" alt="" />
-        <p>
-          PT Media Global Informatika
-          <br />
-          Providing reliable tech since 1992
+    <footer className="bg-primary text-gray-400 py-8 px-4 md:px-6 lg:px-8 my-0">
+      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between">
+        <div className="flex items-center mb-4 md:mb-0">
+          <Link className="flex items-center" href="#">
+            <Image
+              src="/miginfo_logo_white.png"
+              alt="Miginfo white logo"
+              width={64}
+              height={64}
+            />
+          </Link>
+        </div>
+        {/* <nav className="flex space-x-4 md:space-x-6">
+          <Link className="hover:text-gray-300 transition-colors" href="#">
+            Home
+          </Link>
+          <Link className="hover:text-gray-300 transition-colors" href="#">
+            About
+          </Link>
+          <Link className="hover:text-gray-300 transition-colors" href="#">
+            Services
+          </Link>
+          <Link className="hover:text-gray-300 transition-colors" href="#">
+            Contact
+          </Link>
+        </nav> */}
+        <p className="text-sm mt-4 md:mt-0 text-white">
+          © 2024 Acme Inc. All rights reserved.
         </p>
-      </aside>
-      <nav>
-        <h6 className="footer-title">Services</h6>
-        <a className="link link-hover">Branding</a>
-        <a className="link link-hover">Design</a>
-        <a className="link link-hover">Marketing</a>
-        <a className="link link-hover">Advertisement</a>
-      </nav>
-      <nav>
-        <h6 className="footer-title">Company</h6>
-        <a className="link link-hover">About us</a>
-        <a className="link link-hover">Contact</a>
-        <a className="link link-hover">Jobs</a>
-        <a className="link link-hover">Press kit</a>
-      </nav>
-      <nav>
-        <h6 className="footer-title">Legal</h6>
-        <a className="link link-hover">Terms of use</a>
-        <a className="link link-hover">Privacy policy</a>
-        <a className="link link-hover">Cookie policy</a>
-      </nav>
+      </div>
     </footer>
   );
 }

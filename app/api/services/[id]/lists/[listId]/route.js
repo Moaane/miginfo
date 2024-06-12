@@ -7,24 +7,6 @@ import { NextResponse } from "next/server";
 export async function GET(req, { params }) {
   const { listId } = params;
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-  if (!token) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to get categories",
-    });
-  }
-
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to get categories",
-    });
-  }
-
   try {
     const list = await prisma.serviceList.findUnique({ where: { id: listId } });
 
@@ -40,26 +22,9 @@ export async function GET(req, { params }) {
     });
   }
 }
-export async function PATCH(req, { params }) {
+
+export async function PUT(req, { params }) {
   const { listId } = params;
-
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-  if (!token) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to get categories",
-    });
-  }
-
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to get categories",
-    });
-  }
 
   const formData = await req.formData();
   const title = formData.get("title");
@@ -69,15 +34,13 @@ export async function PATCH(req, { params }) {
     const currentList = await prisma.serviceList.findUnique({
       where: { id: listId },
     });
+
     const currentOrder = currentList.order;
 
     const updatedList = await prisma.serviceList.update({
       where: { id: listId },
       data: { title, order },
     });
-
-    console.log("titik awal", currentOrder);
-    console.log("titik akhir", updatedList.order);
 
     await prisma.serviceList.updateMany({
       where: {
@@ -104,24 +67,6 @@ export async function PATCH(req, { params }) {
 
 export async function DELETE(req, { params }) {
   const { listId } = params;
-
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-  if (!token) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to get categories",
-    });
-  }
-
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to get categories",
-    });
-  }
 
   try {
     const deletedList = await prisma.serviceList.delete({

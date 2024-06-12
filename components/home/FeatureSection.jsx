@@ -1,14 +1,13 @@
 "use client";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/all";
-import React, { useRef } from "react";
+import React, { useEffect } from "react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Aos from "aos";
+import "aos/dist/aos.css";
 
 const features = [
   {
@@ -52,40 +51,28 @@ function chunkArray(array, chunkSize) {
 }
 
 export default function FeatureSection() {
-  const container = useRef(null);
-  gsap.registerPlugin(ScrollTrigger);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".c",
-        { y: 300, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.5,
-          duration: 1.5,
-          ease: "power1.inOut",
-          scrollTrigger: {
-            once: true,
-            trigger: ".choose",
-            start: "top bottom",
-            end: "top",
-          },
-        }
-      );
-    },
-    { scope: container }
-  );
-
   const featureChunks = chunkArray(features, 3);
   const half = Math.ceil(featureChunks.length / 2);
   const firstColumnChunks = featureChunks.slice(0, half);
   const secondColumnChunks = featureChunks.slice(half);
 
+  useEffect(() => {
+    Aos.init({
+      startEvent: "DOMContentLoaded",
+      animatedClassName: "aos-animate",
+      useClassNames: true,
+      easing: "ease-out-cubic",
+    });
+  });
+
   return (
-    <div ref={container}>
-      <div className="bg-white choose xl:min-h-[600px] flex justify-center items-center lg:min-h-[600px] text-black px-4">
+    <>
+      <div
+        data-aos="fade-up"
+        data-aos-offset="200"
+        data-aos-duration="600"
+        className="bg-slate-100 choose xl:min-h-[480px] flex justify-center items-center lg:min-h-[600px] text-black px-4 lg:px-8 xl:px-16"
+      >
         <div className="flex-col h-full justify-center items-center w-full max-w-7xl space-y-16">
           <h1 className="c text-2xl text-center md:text-4xl font-semibold">
             Why Choose us?
@@ -97,6 +84,10 @@ export default function FeatureSection() {
                   <div key={chunkIndex}>
                     {chunk.map((item, index) => (
                       <AccordionItem
+                        data-aos="fade-up"
+                        data-aos-offset="200"
+                        data-aos-delay={`${index * 50}`}
+                        data-aos-duration={`${500 / index}`}
                         value={`item-${chunkIndex}-${index}`}
                         key={index}
                       >
@@ -113,6 +104,10 @@ export default function FeatureSection() {
                   <div key={chunkIndex}>
                     {chunk.map((item, index) => (
                       <AccordionItem
+                        data-aos="fade-up"
+                        data-aos-offset="200"
+                        data-aos-delay={`${index * 100}`}
+                        data-aos-duration={`${1000 / index}`}
                         value={`item-${half + chunkIndex}-${index}`}
                         key={index}
                       >
@@ -127,6 +122,6 @@ export default function FeatureSection() {
           </Accordion>
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -2,6 +2,6 @@ import React from 'react'
 
 export default function page() {
   return (
-    <div><h1>KONTOL</h1></div>
+    <div><h1>NOTFOUND</h1></div>
   )
 }
