@@ -390,7 +390,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "c:\\Users\\gpro0\\Documents\\KERJAAN\\NGODING\\miginfo\\prisma\\generated\\client",
+      "value": "C:\\Users\\gpro0\\Documents\\KERJAAN\\NGODING\\miginfo\\prisma\\generated\\client",
       "fromEnvVar": null
     },
     "config": {
@@ -407,7 +407,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../..",
