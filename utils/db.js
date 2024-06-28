@@ -1,5 +1,5 @@
 // lib/prisma.js
-import { PrismaClient } from './prisma/generated/client'
+import { PrismaClient } from "@prisma/client";
 
 // let prisma = new PrismaClient();
 
