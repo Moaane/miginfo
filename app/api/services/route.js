@@ -1,7 +1,4 @@
-import { getToken } from "next-auth/jwt";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { authOptions } from "../auth/[...nextauth]/route";
 import prisma from "@/utils/db";
 import { CreateImage } from "../images/route";
 

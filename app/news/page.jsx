@@ -1,61 +1,112 @@
 "use client";
 import NewsCard from "@/components/news/NewsCard";
-import React, { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { ListFilter } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import PaginationComponent from "@/components/navigation/PaginationComponent";
+
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import Aos from "aos";
+import "aos/dist/aos.css";
+import Image from "next/image";
 
 export default function page() {
-  const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [datas, setDatas] = useState([]);
+  const [page, setPage] = useState();
+  const [meta, setMeta] = useState({
+    currentPage: 1,
+  });
+
+  async function fetchNews(page) {
+    try {
+      setLoading(true);
+      const response = await fetch(`../api/news?page=${page}`, {
+        method: "GET",
+      });
+
+      const result = await response.json();
+
+      setDatas(result.data);
+      console.log(result.data);
+      setMeta(result.meta);
+    } catch (error) {
+      console.log("Error while getting news");
+    } finally {
+      setLoading(false);
+      Aos.refresh();
+    }
+  }
+
+  async function fetchNewsPage() {
+    setLoading(true);
+    try {
+      const response = await fetch("../api/pages/news", {
+        method: "GET",
+      });
+      const result = await response.json();
+      setPage(result.data[0]);
+    } catch (error) {
+    } finally {
+      setLoading(false);
+      Aos.refresh();
+    }
+  }
+
+  const handlePageChange = (page) => {
+    setMeta((prevMeta) => ({
+      ...prevMeta,
+      currentPage: page,
+    }));
+  };
+
+  useEffect(() => {
+    fetchNewsPage();
+    fetchNews(meta.currentPage);
+  }, [meta.currentPage]);
+
+  useEffect(() => {
+    Aos.init({
+      startEvent: "DOMContentLoaded",
+      animatedClassName: "aos-animate",
+      useClassNames: true,
+      easing: "ease-out-cubic",
+    });
+  }, []);
 
   return (
-    <div className="mt-32 lg:mt-32 px-4 lg:px-8 xl:px-16 pb-4 lg:pb-0">
-      <div className="bg-white lg:min-h-full text-black pb-4 lg:pb-0">
-        <div className="flex justify-between p-0 w-full max-w-[1440px]">
-          <div className="a">
-            <h1 className="text-2xl text-primary md:text-4xl lg:text-5xl 2xl:text-6xl font-semibold">
-              News & Events
-            </h1>
-            <p className="text-sm py-2 pb-4 md:py-4 leading-loose">
-              miginfo company and culture are a lot like our product. They’re
-              crafted, not cobbled, for a delightful experience.
-            </p>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                <ListFilter className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Filter
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup value={filter} onValueChange={setFilter}>
-                <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="published">
-                  News
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="onSection">
-                  Events
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <div className="mt-10 md:mt-20 min-h-screen">
+      <div className="container max-w-7xl space-y-12">
+        <div>
+          {page && (
+            <div
+              className="text-center lg:text-left"
+              data-aos="fade-up"
+              data-aos-offset="200"
+            >
+              <h1 className="text-3xl text-primary md:text-4xl lg:text-5xl 2xl:text-6xl font-semibold">
+                {page.title}
+              </h1>
+              <p className="text-sm py-2 pb-4 md:py-4 leading-loose">
+                {page.description}
+              </p>
+            </div>
+          )}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md: min-w-full gap-8">
+          {datas.map((data, index) => (
+            <NewsCard
+              data-aos="fade-up"
+              data-aos-delay={`${index * 500}`}
+              data-aos-duration={`${500 * index}`}
+              news={data}
+              key={data.id}
+            />
+          ))}
+        </div>
+        <div className="py-6">
+          <PaginationComponent meta={meta} onPageChange={handlePageChange} />
         </div>
       </div>
-
-      <NewsCard />
     </div>
   );
 }

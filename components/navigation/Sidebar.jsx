@@ -50,6 +50,8 @@ import { ArrowDown } from "lucide-react";
 import { Toggle } from "../ui/toggle";
 import { Boxes } from "lucide-react";
 import { GalleryThumbnails } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { Layers } from "lucide-react";
 
 const variantButton = {
   full: {
@@ -164,29 +166,34 @@ export default function Sidebar({ children }) {
                 Partners
               </Link>
               <Link
-                href=""
-                className={variantButton.full.disabled}
-                // className={
-                //   pathname === "/dashboard/services"
-                //     ? variantButton.full.active
-                //     : variantButton.full.default
-                // }
+                href="/dashboard/careers"
+                className={
+                  pathname.startsWith("/dashboard/careers")
+                    ? variantButton.full.active
+                    : variantButton.full.default
+                }
               >
                 <BriefcaseBusiness className="h-4 w-4" />
                 Careers
               </Link>
               <Link
-                href=""
+                href="/dashboard/applications"
+                className={
+                  pathname.startsWith("/dashboard/applications")
+                    ? variantButton.full.active
+                    : variantButton.full.default
+                }
+              >
+                <FileText className="h-4 w-4" />
+                Applications
+              </Link>
+              {/* <Link
+                href="/dashboard/careers"
                 className={variantButton.full.disabled}
-                // className={
-                //   pathname === "/dashboard/services"
-                //     ? variantButton.full.active
-                //     : variantButton.full.default
-                // }
               >
                 <FileText className="h-4 w-4" />
                 Portofolios
-              </Link>
+              </Link> */}
               <Link
                 href="/dashboard/carousels"
                 className={
@@ -209,6 +216,56 @@ export default function Sidebar({ children }) {
                 <Users className="h-4 w-4" />
                 Teams
               </Link>
+              <Collapsible>
+                <CollapsibleTrigger asChild>
+                  <div
+                    className={
+                      pathname.startsWith("/dashboard/pages")
+                        ? variantButton.full.active
+                        : variantButton.full.default
+                    }
+                  >
+                    <Layers className="h-4 w-4" />
+                    Pages
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <Link
+                    href="/dashboard/pages/about"
+                    className={
+                      pathname.startsWith("/dashboard/pages/about")
+                        ? variantButton.full.active
+                        : variantButton.full.default
+                    }
+                  >
+                    <HandHeart className="h-4 w-4" />
+                    About
+                  </Link>
+                  <Link
+                    href="/dashboard/pages/services"
+                    className={
+                      pathname.startsWith("/dashboard/pages/services")
+                        ? variantButton.full.active
+                        : variantButton.full.default
+                    }
+                  >
+                    <HandHeart className="h-4 w-4" />
+                    Services
+                  </Link>
+                  <Link
+                    href="/dashboard/pages/news"
+                    className={
+                      pathname.startsWith("/dashboard/pages/news")
+                        ? variantButton.full.active
+                        : variantButton.full.default
+                    }
+                  >
+                    <Newspaper className="h-4 w-4" />
+                    News
+                  </Link>
+                </CollapsibleContent>
+              </Collapsible>
               {/* <Link
                 href="dashboard/portofolios"
                 className={

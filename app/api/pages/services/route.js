@@ -5,7 +5,7 @@ import { CreateImage } from "../../images/route";
 export async function GET(req) {
   const url = new URL(req.url);
   const searchParams = new URLSearchParams(url.searchParams);
-  const page = parseInt(searchParams.get("page"), 10) || 1;
+  const page = parseInt(searchParams.get("page"), 10);
   const skip = (page - 1) * 10;
 
   try {
@@ -14,7 +14,10 @@ export async function GET(req) {
         prisma.servicePage.findMany({
           skip: skip,
           take: 10,
-          orderBy: { head: "asc", title: "asc" },
+          orderBy: [
+            { head: "desc" }, // Untuk menempatkan yang `true` di atas
+            { title: "asc" }, // Kemudian mengurutkan berdasarkan `title` secara ascending
+          ],
         }),
         prisma.servicePage.count(),
       ]);
@@ -36,23 +39,20 @@ export async function GET(req) {
       });
     } else {
       const servicePages = await prisma.servicePage.findMany({
-        orderBy: { head: "asc", title: "asc" },
-      });
-
-      const service = await prisma.service.findMany({
-        select: { name: true, slug: true, id: true },
+        orderBy: [
+          { head: "desc" }, // Untuk menempatkan yang `true` di atas
+          { title: "asc" }, // Kemudian mengurutkan berdasarkan `title` secara ascending
+        ],
       });
 
       return NextResponse.json({
-        data: {
-          section: servicePages,
-          nav: service,
-        },
+        data: servicePages,
         status: 200,
         message: "Service pages retrieved successfully",
       });
     }
   } catch (error) {
+    console.log(error);
     return NextResponse.json({
       status: 500,
       message: "Error while retrieving serivice pages",
@@ -65,7 +65,7 @@ export async function POST(req) {
   const title = formData.get("title");
   const description = formData.get("description");
   const image = formData.get("image");
-  const direction = formData.get("direction");
+  const direction = formData.get("direction").toUpperCase();
   const head = formData.get("head") === "true";
 
   try {

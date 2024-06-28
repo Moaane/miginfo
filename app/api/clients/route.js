@@ -14,64 +14,62 @@ export async function GET(req) {
         ? { clientCategories: { every: { categoryId: filter } } }
         : {};
 
-    let dataPromise, totalPromise;
-
     if (page) {
       const skip = page > 0 ? 10 * (page - 1) : 0;
-      dataPromise = prisma.client.findMany({
-        where: whereCondition,
-        skip,
-        take: 10,
-        orderBy: { name: "asc" },
-        include: {
-          clientCategories: {
-            select: {
-              categories: {
-                select: {
-                  name: true,
+      const [data, total] = await Promise.all([
+        prisma.client.findMany({
+          where: whereCondition,
+          skip,
+          take: 10,
+          orderBy: { name: "asc" },
+          include: {
+            clientCategories: {
+              select: {
+                categories: {
+                  select: {
+                    name: true,
+                  },
                 },
               },
             },
           },
+        }),
+        prisma.client.count({ where: whereCondition }),
+      ]);
+
+      const lastPage = total > 10 ? Math.ceil(total / 10) : 1;
+
+      return NextResponse.json({
+        meta: {
+          total: total,
+          lastPage: lastPage,
+          currentPage: page,
+          perPage: 10 || total,
+          prev: page && page > 1 ? page - 1 : null,
+          next: page && page < lastPage ? page + 1 : null,
         },
+        data: data,
+        status: 200,
+        message: "Clients retrieved successfully",
       });
     } else {
-      dataPromise = prisma.client.findMany({
-        where: whereCondition,
-        orderBy: { name: "asc" },
+      const clients = await prisma.category.findMany({
+        where: { type: "CLIENT" },
         include: {
           clientCategories: {
             select: {
-              categories: {
-                select: {
-                  name: true,
-                },
-              },
+              clients: true,
             },
           },
         },
       });
+
+      return NextResponse.json({
+        data: clients,
+        status: 200,
+        message: "Clients retrieved successfully",
+      });
     }
-
-    totalPromise = prisma.client.count({ where: whereCondition });
-
-    const [data, total] = await Promise.all([dataPromise, totalPromise]);
-
-    const lastPage = total > 10 ? Math.ceil(total / 10) : 1;
-
-    return NextResponse.json({
-      meta: {
-        total: total,
-        lastPage: lastPage,
-        currentPage: page,
-        perPage: 10 || total,
-        prev: page && page > 1 ? page - 1 : null,
-        next: page && page < lastPage ? page + 1 : null,
-      },
-      data,
-      status: 200,
-      message: "Clients retrieved successfully",
-    });
   } catch (error) {
     console.log(error);
     return NextResponse.json({

@@ -67,7 +67,7 @@ export default function EventMenu({ data, meta, onPageChange, onDelete }) {
                 <TableRow>
                   <TableHead>No</TableHead>
                   <TableHead>Title</TableHead>
-                  <TableHead>Description</TableHead>
+                  <TableHead>Slug</TableHead>
                   <TableHead className="hidden md:table-cell">
                     Category
                   </TableHead>
@@ -86,9 +86,11 @@ export default function EventMenu({ data, meta, onPageChange, onDelete }) {
                     <TableCell className="font-medium">
                       {index + 1 + (meta.currentPage - 1) * meta.perPage}
                     </TableCell>
-                    <TableCell className="font-medium">{prop.title}</TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {prop.description}
+                    <TableCell className="font-medium">
+                      <p className="line-clamp-1">{prop.title}</p>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <p className="line-clamp-1">{prop.slug}</p>
                     </TableCell>
                     <TableCell className="font-medium">
                       {prop.eventCategories[0]?.categories?.name}

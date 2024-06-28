@@ -44,13 +44,26 @@ export async function PUT(req, { params }) {
 
   const formData = await req.formData();
   const title = formData.get("title");
+  let slug = formData.get("slug");
   const description = formData.get("description");
   const categoryId = formData.get("category");
   const image = formData.get("image");
   let imageName = formData.get("imageName");
+  slug = slug.toLowerCase().replace(/\s+/g, "-");
   const userId = token.sub;
 
   try {
+    const existingSlug = await prisma.news.findUnique({
+      where: { slug: slug },
+    });
+
+    if (existingSlug && existingSlug.id !== id) {
+      return NextResponse.json({
+        status: 400,
+        message: "Slug already been used",
+      });
+    }
+
     const newsCategories = await prisma.newsCategory.findFirst({
       where: { newsId: id },
     });
@@ -74,6 +87,7 @@ export async function PUT(req, { params }) {
       where: { id },
       data: {
         title: title,
+        slug: slug,
         description: description,
         userId: userId,
         image: imageData,

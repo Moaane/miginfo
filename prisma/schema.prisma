@@ -82,7 +82,7 @@ model Category {
 model Service {
   id          String  @id @default(cuid())
   name        String
-  description String
+  description String  @db.LongText
   slug        String  @unique
   image       Json?
   icon        Json?
@@ -179,7 +179,8 @@ enum NewsTypes {
 model News {
   id          String    @id @default(cuid())
   title       String
-  description String
+  slug        String    @unique
+  description String    @db.LongText
   image       Json?
   userId      String    @map("user_id")
   type        NewsTypes @default(NEWS)
@@ -278,4 +279,92 @@ model NewsPage {
   description String @db.Text
 
   @@map("news_pages")
+}
+
+model Question {
+  id          String @id @default(cuid())
+  title       String
+  description String @db.Text
+
+  @@map("questions")
+}
+
+model Feature {
+  id          String @id @default(cuid())
+  title       String
+  description String @db.Text
+
+  @@map("features")
+}
+
+enum JobModel {
+  WFO
+  WFH
+  HYBRID
+}
+
+enum JobType {
+  FULLTIME
+  PARTTIME
+  INTERN
+}
+
+model Career {
+  id             String   @id @default(cuid())
+  position       String
+  description    String   @db.LongText
+  requirement    String   @db.LongText
+  responsibility String   @db.LongText
+  benefit        String   @db.LongText
+  howToApply     String   @db.LongText
+  type           JobType
+  model          JobModel
+  active         Boolean
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  applications Application[]
+
+  @@map("careers")
+}
+
+model Application {
+  id              String  @id @default(cuid())
+  fullname        String  @map("full_name")
+  gender          String
+  placeBirth      String  @map("place_birth")
+  dateBirth       String  @map("date_birth")
+  religion        String
+  province        String
+  regency         String
+  district        String
+  village         String
+  address         String
+  formalEducation String  @map("formal_education")
+  institution     String
+  faculty         String
+  major           String
+  gpa             Float
+  marital         Boolean
+  email           String
+  idCard          String
+  phoneNumber     String  @map("phone_number")
+
+  // recent work
+  company       String?
+  companyCity   String? @map("company_city")
+  lengthWork    String? @map("length_work")
+  position      String?
+  reasonLeaving String? @map("reason_leaving")
+
+  careerId String?
+  resume   Json?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  careers Career? @relation(fields: [careerId], references: [id])
+
+  @@map("applications")
 }

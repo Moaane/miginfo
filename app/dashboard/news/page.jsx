@@ -12,8 +12,6 @@ export default function Page() {
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState({
     currentPage: 1,
-    page: 1,
-    perPage: 3,
   });
 
   const router = useRouter();
@@ -21,12 +19,9 @@ export default function Page() {
   async function fetchNews(page) {
     try {
       setLoading(true);
-      const response = await fetch(
-        `../../api/news?page=${page}&perPage=${meta.perPage}`,
-        {
-          method: "GET",
-        }
-      );
+      const response = await fetch(`../../api/news?page=${page}`, {
+        method: "GET",
+      });
 
       const result = await response.json();
 

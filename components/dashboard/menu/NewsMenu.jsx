@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function NewsMenu({ data, meta, onPageChange, onDelete }) {
+  console.log(data);
   const [id, setId] = useState(null);
 
   const handlePageChange = (page) => {
@@ -67,7 +68,7 @@ export default function NewsMenu({ data, meta, onPageChange, onDelete }) {
                 <TableRow>
                   <TableHead>No</TableHead>
                   <TableHead>Title</TableHead>
-                  <TableHead>Description</TableHead>
+                  <TableHead>Slug</TableHead>
                   <TableHead className="hidden md:table-cell">
                     Category
                   </TableHead>
@@ -75,9 +76,7 @@ export default function NewsMenu({ data, meta, onPageChange, onDelete }) {
                   <TableHead className="hidden md:table-cell">
                     Created at
                   </TableHead>
-                  <TableHead>
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -86,9 +85,11 @@ export default function NewsMenu({ data, meta, onPageChange, onDelete }) {
                     <TableCell className="font-medium">
                       {index + 1 + (meta.currentPage - 1) * meta.perPage}
                     </TableCell>
-                    <TableCell className="font-medium">{prop.title}</TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {prop.description}
+                    <TableCell className="font-medium">
+                      <p className="line-clamp-1">{prop.title}</p>
+                    </TableCell>
+                    <TableCell className="font-medium line-clamp-3">
+                      <p className="line-clamp-1">{prop.slug}</p>
                     </TableCell>
                     <TableCell className="font-medium">
                       {prop.newsCategories[0]?.categories?.name}

@@ -7,48 +7,95 @@ export async function GET(req) {
   const url = new URL(req.url);
   const searchParams = new URLSearchParams(url.searchParams);
   const page = parseInt(searchParams.get("page"), 10);
-  const perPage = parseInt(searchParams.get("perPage"), 10);
-  const skip = page > 0 ? perPage * (page - 1) : 0;
-
-  let data;
-  let total;
-  let lastPage;
 
   try {
-    [data, total] = await Promise.all([
-      prisma.news.findMany({
-        where: { type: "NEWS" },
-        skip,
-        take: perPage,
-        orderBy: {
-          createdAt: "desc",
-        },
-        include: {
-          newsCategories: {
-            select: {
-              categories: {
-                select: { name: true },
+    if (page) {
+      const skip = page > 0 ? 10 * (page - 1) : 0;
+      const [data, total] = await Promise.all([
+        prisma.news.findMany({
+          where: { type: "NEWS" },
+          skip,
+          take: 10,
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            newsCategories: {
+              select: {
+                categories: {
+                  select: { name: true },
+                },
               },
             },
           },
+        }),
+        prisma.news.count({ where: { type: "NEWS" } }),
+      ]);
+      const lastPage = Math.ceil(total / 10);
+
+      return NextResponse.json({
+        meta: {
+          total,
+          lastPage,
+          currentPage: page,
+          perPage: 10,
+          prev: page > 1 ? page - 1 : null,
+          next: page < lastPage ? page + 1 : null,
         },
-      }),
-      prisma.news.count({ where: { type: "NEWS" } }),
-    ]);
-    lastPage = Math.ceil(total / perPage);
+        data,
+        status: 200,
+        message: "News get successfully",
+      });
+    }
+
+    const news = await prisma.news.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        newsCategories: {
+          select: {
+            categories: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+    });
 
     return NextResponse.json({
-      meta: {
-        total,
-        lastPage,
-        currentPage: page,
-        perPage,
-        prev: page > 1 ? page - 1 : null,
-        next: page < lastPage ? page + 1 : null,
-      },
-      data,
+      data: news,
       status: 200,
-      message: "News get successfully",
+      message: "News is retrieved successfully",
+    });
+  } catch (error) {
+    return NextResponse.json({
+      status: 500,
+      message: "Error while getting news",
+    });
+  }
+}
+
+export async function getNews() {
+  try {
+    const news = await prisma.news.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        newsCategories: {
+          select: {
+            categories: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+    });
+    return NextResponse.json({
+      data: news,
+      status: 200,
+      message: "News is retrieved successfully",
     });
   } catch (error) {
     return NextResponse.json({
@@ -67,17 +114,30 @@ export async function POST(req) {
       message: "Unauthorized to get categories",
     });
   }
-  
+
   const formData = await req.formData();
   const title = formData.get("title");
+  let slug = formData.get("slug");
   const description = formData.get("description");
   const categoryId = formData.get("category");
   const image = formData.get("image");
   let imageName = formData.get("imageName");
   imageName = imageName || title;
+  slug = slug || title.toLowerCase().replace(/\s+/g, "-");
   const userId = token.sub;
 
   try {
+    const existingNews = await prisma.news.findUnique({
+      where: { slug: slug },
+    });
+
+    if (existingNews) {
+      return NextResponse.json({
+        status: 400,
+        message: "Slug already been used",
+      });
+    }
+
     const imageData =
       image && image instanceof Blob
         ? await CreateImage(image, imageName)
@@ -87,6 +147,7 @@ export async function POST(req) {
       data: {
         type: "NEWS",
         title: title,
+        slug: slug,
         description: description,
         image: imageData,
         newsCategories: {

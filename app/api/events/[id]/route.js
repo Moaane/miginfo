@@ -47,13 +47,26 @@ export async function PUT(req, { params }) {
   const { id } = params;
   const formData = await req.formData();
   const title = formData.get("title");
+  let slug = formData.get("slug");
   const description = formData.get("description");
   const categoryId = formData.get("category");
   const image = formData.get("image");
   let imageName = formData.get("imageName");
   const userId = token.sub;
+  slug = slug || title.toLowerCase().replace(/\s+/g, "-");
 
   try {
+    const existingEvent = await prisma.news.findUnique({
+      where: { slug: slug },
+    });
+
+    if (existingEvent && existingEvent.id !== id) {
+      return NextResponse.json({
+        status: 400,
+        message: "Slug already been used",
+      });
+    }
+
     const eventCategories = await prisma.eventCategory.findFirst({
       where: { eventId: id },
     });
@@ -81,6 +94,7 @@ export async function PUT(req, { params }) {
       where: { id },
       data: {
         title: title,
+        slug: slug,
         description: description,
         userId: userId,
         image: imageData,

@@ -21,28 +21,29 @@ export default function QuestionSection() {
         data-aos="fade-up"
         data-aos-offset="200"
         data-aos-duration="600"
-        className="question bg-primary lg:min-h-[600px] text-black flex justify-center items-center px-4 lg:px-8 xl:px-16"
+        className="bg-primary lg:min-h-[600px] text-black flex items-center"
       >
-        <div className="w-full h-full flex flex-col-reverse lg:flex-row space-y-4 justify-center items-center px-0 max-w-7xl">
+        <div className="container max-w-7xl flex flex-col-reverse md:flex-row space-y-4 space-x-6 items-center">
           <div
             data-aos="fade-up"
             data-aos-offset="200"
             data-aos-delay="300"
             data-aos-duration="800"
-            className="q lg:w-1/2 w-full"
+            className="q md:w-1/2 w-full"
           >
-            <div className="pt-6">
-              <h1 className="text-2xl text-center lg:text-left text-white md:text-3xl lg:text-4xl xl:text-6xl font-semibold">
+            <div className="pt-6 text-center md:text-left text-wrap">
+              <h1 className="text-2xl text-white md:text-3xl lg:text-4xl xl:text-6xl font-semibold">
                 Got questions?
               </h1>
-            </div>
-            <p className="text-sm py-6 text-center lg:text-left text-white md:py-4 leading-loose">
-              Contact us through our 24/7 live chat.We’re always happy to help!
-            </p>
-            <div className="flex justify-center lg:block">
-              <Button asChild variant="outline">
-                <Link href="/contact">Let's talk</Link>
-              </Button>
+              <p className="text-sm py-6 text-white md:py-4 leading-loose">
+                Contact us through our 24/7 live chat.We’re always happy to
+                help!
+              </p>
+              <div className="flex justify-center md:block">
+                <Button asChild variant="outline">
+                  <Link href="/contact">Let's talk</Link>
+                </Button>
+              </div>
             </div>
           </div>
           <div
@@ -50,11 +51,11 @@ export default function QuestionSection() {
             data-aos-offset="200"
             data-aos-delay="600"
             data-aos-duration="800"
-            className="q lg:w-1/2 flex w-full justify-center lg:justify-end"
+            className="md:w-1/2 flex w-full justify-center lg:justify-end"
           >
             <img
               src="/img_holder.png"
-              className="md:max-w-lg w-full rounded-xl shadow-2xl"
+              className="md:max-w-md w-full rounded-xl shadow-2xl"
             />
           </div>
         </div>

@@ -1,4 +1,3 @@
-"use client";
 import ImageCarouselSection from "@/components/home/ImageCarouselSection";
 import NewsCarouselSection from "@/components/home/NewsCarouselSection";
 import Navbar from "@/components/navigation/Navbar";
@@ -6,15 +5,9 @@ import ServiceCard from "@/components/service/ServiceCard";
 import FeatureSection from "@/components/home/FeatureSection";
 import QuestionSection from "@/components/home/QuestionSection";
 import Footer from "@/components/navigation/Footer";
-import React, { Suspense, useEffect, useState } from "react";
+import React from "react";
 import Image from "next/image";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
-import AutoScroll from "embla-carousel-auto-scroll";
+import { getNews } from "./api/news/route";
 
 const PartnerLogos = [
   {
@@ -103,61 +96,53 @@ const PartnerLogos = [
   },
 ];
 
-export default function Home() {
-  const [services, setServices] = useState([]);
+async function fetchNews() {
+  const response = await getNews();
+  const result = await response.json();
+  return result.data;
+}
 
-  // async function getServices() {
-  //   const response = await fetch(
-  //     `/api/services?filter=onSection&page=1&perPage=6`,
-  //     {
-  //       method: "GET",
-  //     }
-  //   );
-  //   const result = await response.json();
-  //   console.log(result);
-  //   setServices(result.data);
-  // }
-
-  // useEffect(() => {
-  //   getServices();
-  // }, []);
+export default async function Page() {
+  const news = await fetchNews();
 
   return (
     <>
       <Navbar />
-      {/* <HomeSlider /> */}
       <ImageCarouselSection />
-      <div className="bg-red-100 overflow-hidden mt-24">
-        <div className="flex space-x-16 justify-center items-center animate-loop-scroll w-full z-10">
-          {PartnerLogos?.map((prop, index) => (
-            <Image
-              key={index}
-              className="w-full h-full max-w-none:"
-              loading="lazy"
-              src={`/partner/${prop.logo}_logo.png`}
-              alt={prop.alt}
-              width={128}
-              height={64}
-            />
-          ))}
-          {PartnerLogos?.map((prop, index) => (
-            <Image
-              key={index}
-              className="w-full h-full max-w-none:"
-              loading="lazy"
-              src={`/partner/${prop.logo}_logo.png`}
-              alt={prop.alt}
-              width={128}
-              height={64}
-            />
-          ))}
+      <div className="space-y-12 md:space-y-20">
+        <div className="overflow-hidden">
+          <div className="flex space-x-8 md:space-x-16 justify-center items-center animate-loop-scroll w-full z-10">
+            {PartnerLogos?.map((prop, index) => (
+              <Image
+                key={index}
+                className="w-full h-full max-w-none:"
+                loading="lazy"
+                src={`/partner/${prop.logo}_logo.png`}
+                alt={prop.alt}
+                width={128}
+                height={64}
+              />
+            ))}
+            {PartnerLogos?.map((prop, index) => (
+              <Image
+                key={index}
+                className="w-full h-full max-w-none:"
+                loading="lazy"
+                src={`/partner/${prop.logo}_logo.png`}
+                alt={prop.alt}
+                width={128}
+                height={64}
+              />
+            ))}
+          </div>
         </div>
+        <ServiceCard />
+        <NewsCarouselSection news={news} />
+        <FeatureSection />
+        <QuestionSection />
       </div>
 
-      <ServiceCard services={services} />
-      <NewsCarouselSection />
-      <FeatureSection />
-      <QuestionSection />
+      <Footer />
     </>
   );
 }

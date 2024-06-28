@@ -160,7 +160,7 @@ export default function Page({ params }) {
                           {prop.order}
                         </TableCell>
                         <TableCell className="font-medium">
-                          {prop.title}
+                          {prop.name}
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>

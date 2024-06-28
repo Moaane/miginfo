@@ -1,6 +1,5 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
+    "use client";
+import React, { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,14 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -34,7 +25,7 @@ import {
 import Loader from "@/components/loader/Loader";
 
 const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  name: z.string().min(1, "Name is required"),
   order: z.string().min(1, "Order is required"),
 });
 
@@ -42,12 +33,11 @@ export default function page({ params }) {
   const { id } = params;
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  console.log(id);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
+      name: "",
       order: "1",
     },
   });
@@ -55,10 +45,10 @@ export default function page({ params }) {
   async function onSubmit(data) {
     try {
       const formData = new FormData();
-      formData.append("title", data.title);
+      formData.append("name", data.name);
       formData.append("order", parseInt(data.order));
 
-      const res = await fetch(`../../../../api/services/${id}/lists`, {
+      const res = await fetch(`/api/services/${id}/lists`, {
         method: "POST",
         body: formData,
       });
@@ -88,14 +78,14 @@ export default function page({ params }) {
                     <span className="sr-only">Back</span>
                   </Button>
                   <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                    New Services
+                    New Service List
                   </h1>
                   <div className="hidden items-center gap-2 md:ml-auto md:flex">
                     {/* <Button variant="outline" size="sm">
               Discard
             </Button> */}
                     <Button variant="primary" size="sm">
-                      Save Product
+                      Save Service List
                     </Button>
                   </div>
                 </div>
@@ -103,25 +93,22 @@ export default function page({ params }) {
                   <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
                     <Card x-chunk="dashboard-07-chunk-0">
                       <CardHeader>
-                        <CardTitle>Service Details</CardTitle>
-                        <CardDescription>
-                          Lipsum dolor sit amet, consectetur adipiscing elit
-                        </CardDescription>
+                        <CardTitle>Service List Details</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="grid gap-6">
                           <div className="grid gap-3">
                             <FormField
                               control={form.control}
-                              name="title"
+                              name="name"
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Title</FormLabel>
                                   <FormControl>
                                     <Input
-                                      name="title"
+                                      name="name"
                                       className="w-full border-primary ring-primary"
-                                      placeholder="title"
+                                      placeholder="name"
                                       {...field}
                                     />
                                   </FormControl>

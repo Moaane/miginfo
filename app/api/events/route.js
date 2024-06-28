@@ -69,17 +69,26 @@ export async function POST(req) {
 
   const formData = await req.formData();
   const title = formData.get("title");
+  let slug = formData.get("slug");
   const description = formData.get("description");
   const categoryId = formData.get("category");
   const image = formData.get("image");
   let imageName = formData.get("imageName");
   imageName = imageName || title;
+  slug = slug || title.toLowerCase().replace(/\s+/g, "-");
   const userId = token.sub;
 
   try {
-    const formData = new FormData();
-    formData.append("image", image);
-    formData.append("imageName", imageName);
+    const existingEvent = await prisma.news.findUnique({
+      where: { slug: slug },
+    });
+
+    if (existingEvent) {
+      return NextResponse.json({
+        status: 400,
+        message: "Slug already been used",
+      });
+    }
 
     const imageData =
       image && image instanceof Blob
@@ -90,6 +99,7 @@ export async function POST(req) {
       data: {
         type: "EVENT",
         title: title,
+        slug: slug,
         description: description,
         image: imageData,
         eventCategories: {

@@ -1,53 +1,32 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Aos from "aos";
 import "aos/dist/aos.css";
 
-const services = [
-  {
-    imgUrl: "icon/management-icon.svg",
-    whiteImgUrl: "quality-icon-white.png",
-    title: "Project Management",
-    description:
-      "At MIGINFO, all of our IT Project Managers go thru a rigorous training in managerial skills.",
-  },
-  {
-    imgUrl: "quality-icon.png",
-    whiteImgUrl: "quality-icon-white.png",
-    title: "Quality Testing",
-    description:
-      "At MIGINFO, all of our IT Project Managers go thru a rigorous training in managerial skills.",
-  },
-  {
-    imgUrl: "architecture-icon.png",
-    whiteImgUrl: "quality-icon-white.png",
-    title: "Architecture",
-    description:
-      "At MIGINFO, all of our IT Project Managers go thru a rigorous training in managerial skills.",
-  },
-  {
-    imgUrl: "development-icon.png",
-    whiteImgUrl: "quality-icon-white.png",
-    title: "Development",
-    description:
-      "At MIGINFO, all of our IT Project Managers go thru a rigorous training in managerial skills.",
-  },
-  {
-    imgUrl: "bussiness-icon.png",
-    whiteImgUrl: "quality-icon-white.png",
-    title: "Bussiness Analyst",
-    description:
-      "At MIGINFO, all of our IT Project Managers go thru a rigorous training in managerial skills.",
-  },
-  {
-    imgUrl: "maintenance-icon.png",
-    whiteImgUrl: "quality-icon-white.png",
-    title: "Maintenance",
-    description:
-      "At MIGINFO, all of our IT Project Managers go thru a rigorous training in managerial skills.",
-  },
-];
 export default function ServiceCard() {
+  const [loading, setLoading] = useState(true);
+  const [datas, setDatas] = useState([]);
+
+  async function fetchServiceCard() {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/pages/services/card", {
+        method: "GET",
+      });
+      const result = await response.json();
+      setDatas(result.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+      Aos.refresh();
+    }
+  }
+
+  useEffect(() => {
+    fetchServiceCard();
+  }, []);
+
   useEffect(() => {
     Aos.init({
       startEvent: "DOMContentLoaded",
@@ -55,58 +34,50 @@ export default function ServiceCard() {
       useClassNames: true,
       easing: "ease-out-cubic",
     });
-  });
-  {
-    /* <span className="absolute m-auto -top-[120px] md:-top-32 lg:-top-[158px] left-1/2 transform -translate-x-1/2 xl:top-[62px] -z-10 h-20 w-20 rounded-full bg-sky-500 transition-all duration-500 group-hover:scale-[10]"></span> */
-  }
+  }, []);
 
   return (
-    <>
-      <div
-        data-aos="fade-up"
-        data-aos-offset="200"
-        data-aos-duration="600"
-        className="bg-white service xl:min-h-[600px] flex justify-center lg:min-h-[480px] text-black mt-12 px-4 md:px-12 lg:px-8 xl:px-20"
-      >
-        <div className="w-full max-w-7xl flex flex-col h-full justify-center items-center space-y-8 lg:space-y-16">
-          <h1 className="s text-2xl md:text-4xl font-semibold">Our Services</h1>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-6 2xl:gap-10">
-            {services?.map((service, index) => (
-              <>
-                <div
-                  data-aos="fade-up"
-                  data-aos-offset="200"
-                  data-aos-delay={`${index * 50}`}
-                  data-aos-duration={`${500 / index}`}
-                  className="hover:card-wrapper bg-white bg-opacity-30 backdrop-blur-3xl rounded-xl w-full h-full p-2 transition delay-150 duration-300 ease-in-out"
-                >
-                  <div
-                    key={index}
-                    className="group backdrop-blur-3xl overflow-hidden bg-white shadow-xl ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl sm:max-w-sm rounded-xl"
-                  >
-                    <div className="flex flex-col items-center gap-4 py-6 lg:py-16 transition-all ease-linear duration-500 rounded-xl">
-                      <div className="h-20 w-20 flex items-center justify-center rounded-full bg-sky-500 transition-all duration-300 group-hover:bg-sky-400">
-                        <img
-                          src={`/${service.whiteImgUrl}`}
-                          alt="On Hover"
-                          className="w-10 h-10 md:w-14 md:h-14"
-                        />
-                      </div>
-                      <h3 className="text-lg md:text-xl xl:text-2xl font-medium text-primary">
-                        {service.title}
-                      </h3>
-                      <p className="text-sm md:text-base xl:text-lg text-center opacity-70 w-2/3">
-                        {service.description}
-                      </p>
-                    </div>
+    <div
+      data-aos="fade-up"
+      data-aos-offset="200"
+      data-aos-duration="600"
+      className="text-black"
+    >
+      <div className="container max-w-7xl space-y-6 md:space-y-12">
+        <h1 className="text-2xl text-center md:text-4xl font-semibold">Our Services</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-6 2xl:gap-10">
+          {datas?.map((data, index) => (
+            <>
+              <div
+                data-aos="fade-up"
+                data-aos-offset="200"
+                data-aos-delay={`${index * 50}`}
+                data-aos-duration={`${500 / index}`}
+                key={data.id}
+                className="group backdrop-blur-3xl overflow-hidden bg-white shadow-xl ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl sm:max-w-sm rounded-xl"
+              >
+                <span className="absolute -left-52 top-[-6em]  h-[52em] w-64 rotate-[25deg] group-hover:bg-white/30 transition-all"></span>
+                <span className="absolute bg-transparent h-2 w-2 m-auto inset-0 -top-10 -z-10 rounded-full group-hover:bg-sky-500 transition-all duration-500 group-hover:scale-[120]"></span>{" "}
+                <div className="flex flex-col items-center gap-4 py-6 lg:py-16 transition-all ease-linear duration-500 rounded-xl">
+                  <div className="h-20 w-20 md:h-24 md:w-24 flex items-center justify-center rounded-full bg-sky-500 transition-all duration-300 group-hover:bg-sky-400">
+                    <img
+                      src={`/api/images/${data.icon.filename}`}
+                      alt="On Hover"
+                      className="w-10 h-10 md:w-14 md:h-14"
+                    />
                   </div>
+                  <h3 className="text-lg font-semibold md:text-xl xl:text-2xl text-primary group-hover:text-white">
+                    {data.name}
+                  </h3>
+                  <p className="text-sm md:text-base xl:text-lg text-center opacity-70 w-2/3 group-hover:text-white">
+                    {data.description}
+                  </p>
                 </div>
-              </>
-            ))}
-          </div>
+              </div>
+            </>
+          ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -1,94 +1,38 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import PaginationComponent from "../navigation/PaginationComponent";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-} from "../ui/pagination";
+import "aos/dist/aos.css";
+import Image from "next/image";
 
-const news = [
-  {
-    imgUrl: "img_holder.png",
-    title:
-      "Sosialisasi Kekayaan Intelektual dan Peluncuran Sistem Keterunutan Indikasi Geografis",
-    category: "News",
-    slug: "news-berita",
-  },
-  {
-    imgUrl: "img_holder.png",
-    title:
-      "Sosialisasi Kekayaan Intelektual dan Peluncuran Sistem Keterunutan Indikasi Geografis",
-    category: "News",
-  },
-  {
-    imgUrl: "img_holder.png",
-    title:
-      "Sosialisasi Kekayaan Intelektual dan Peluncuran Sistem Keterunutan Indikasi Geografis",
-    category: "News",
-  },
-  {
-    imgUrl: "img_holder.png",
-    title:
-      "Sosialisasi Kekayaan Intelektual dan Peluncuran Sistem Keterunutan Indikasi Geografis",
-    category: "News",
-  },
-  {
-    imgUrl: "img_holder.png",
-    title:
-      "Sosialisasi Kekayaan Intelektual dan Peluncuran Sistem Keterunutan Indikasi Geografis",
-    category: "News",
-  },
-  {
-    imgUrl: "img_holder.png",
-    title:
-      "Sosialisasi Kekayaan Intelektual dan Peluncuran Sistem Keterunutan Indikasi Geografis",
-    category: "News",
-  },
-];
-
-export default function NewsCard() {
+const NewsCard = React.forwardRef(({ news, ...props }, ref) => {
   return (
-    <div className=" flex justify-center">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 bg-white min-w-full max-w-[1440px] gap-8 justify-items-stretch py-12">
-        {news.map((news, index) => (
-          <Link
-            href={`/news/${news.slug}`}
-            key={index}
-            className="w-full bg-base-100 shadow-xl rounded-2xl hover:scale-110 transition-all ease-out"
-          >
-            <figure>
-              <img
-                src={`/${news.imgUrl}`}
-                alt="Shoes"
-                className="rounded-2xl"
-              />
-            </figure>
-            <div className="p-4 space-y-4">
-              <h2 className="text-base font-medium">{news.title}</h2>
-              <div className="justify-end">
-                <Badge>{news.category}</Badge>
-              </div>
-            </div>
-          </Link>
-        ))}
-        <Pagination className="col-span-3 w-full">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationLink href="" isActive>1</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink>2</PaginationLink>
-            </PaginationItem>
-            <PaginationItem></PaginationItem>
-            <PaginationLink>3</PaginationLink>
-          </PaginationContent>
-        </Pagination>
+    <Link
+      href={`/news/${news.slug}`}
+      className="group text-wrap hover:animate-border-animation inline-block rounded-md hover:bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-[length:400%_400%] p-[8px]"
+      {...props}
+      ref={ref}
+    >
+      <div className="text-wrap">
+        <figure className="overflow-hidden">
+          <Image
+            height={300}
+            width={300}
+            src={`/api/images/${news.image.filename}`}
+            alt={news.image.name}
+            priority
+            className="rounded-t-md w-full min-h-[300px] group-hover:scale-110 transition-all duration-300 ease-out bg-white object-cover"
+          />
+        </figure>
+
+        <div className="bg-white/95 shadow-md rounded-b-md min-h-[120px] p-4 space-y-4 text-wrap flex flex-col justify-between">
+          <h2 className="text-base font-medium line-clamp-2">{news.title}</h2>
+          <Badge className="bg-primary w-fit">
+            {news.newsCategories[0]?.categories?.name}
+          </Badge>
+        </div>
       </div>
-      {/* <PaginationComponent /> */}
-    </div>
+    </Link>
   );
-}
+});
+
+export default NewsCard;

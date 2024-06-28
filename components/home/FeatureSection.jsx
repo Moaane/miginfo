@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -8,39 +8,6 @@ import {
 } from "@/components/ui/accordion";
 import Aos from "aos";
 import "aos/dist/aos.css";
-
-const features = [
-  {
-    title: "Experience",
-    description:
-      " We have over fifteen years experience operating IT Solutions in challenging areas at Indonesia. Our experience takes the strain and pressure off the customer, delivering a viable solution",
-  },
-  {
-    title: "Experience",
-    description:
-      " We have over fifteen years experience operating IT Solutions in challenging areas at Indonesia. Our experience takes the strain and pressure off the customer, delivering a viable solution",
-  },
-  {
-    title: "Experience",
-    description:
-      " We have over fifteen years experience operating IT Solutions in challenging areas at Indonesia. Our experience takes the strain and pressure off the customer, delivering a viable solution",
-  },
-  {
-    title: "Experience",
-    description:
-      " We have over fifteen years experience operating IT Solutions in challenging areas at Indonesia. Our experience takes the strain and pressure off the customer, delivering a viable solution",
-  },
-  {
-    title: "Experience",
-    description:
-      " We have over fifteen years experience operating IT Solutions in challenging areas at Indonesia. Our experience takes the strain and pressure off the customer, delivering a viable solution",
-  },
-  {
-    title: "Experience",
-    description:
-      " We have over fifteen years experience operating IT Solutions in challenging areas at Indonesia. Our experience takes the strain and pressure off the customer, delivering a viable solution",
-  },
-];
 
 function chunkArray(array, chunkSize) {
   const chunks = [];
@@ -51,10 +18,25 @@ function chunkArray(array, chunkSize) {
 }
 
 export default function FeatureSection() {
-  const featureChunks = chunkArray(features, 3);
-  const half = Math.ceil(featureChunks.length / 2);
-  const firstColumnChunks = featureChunks.slice(0, half);
-  const secondColumnChunks = featureChunks.slice(half);
+  const [firstColumnChunks, setFirstColumnChunks] = useState([]);
+  const [secondColumnChunks, setSecondColumnChunks] = useState([]);
+  const [half, setHalf] = useState(0);
+
+  async function fetchFeatures() {
+    try {
+      const response = await fetch("/api/features", {
+        method: "GET",
+      });
+      const result = await response.json();
+      const featureChunks = chunkArray(result.data, 2);
+      const halfLength = Math.ceil(featureChunks.length / 2);
+      setFirstColumnChunks(featureChunks.slice(0, halfLength));
+      setSecondColumnChunks(featureChunks.slice(halfLength));
+      setHalf(halfLength);
+    } catch (error) {
+      console.log("Error while retrieving features");
+    }
+  }
 
   useEffect(() => {
     Aos.init({
@@ -65,15 +47,19 @@ export default function FeatureSection() {
     });
   });
 
+  useEffect(() => {
+    fetchFeatures();
+  }, []);
+
   return (
     <>
       <div
         data-aos="fade-up"
         data-aos-offset="200"
         data-aos-duration="600"
-        className="bg-slate-100 choose xl:min-h-[480px] flex justify-center items-center lg:min-h-[600px] text-black px-4 lg:px-8 xl:px-16"
+        className="text-black"
       >
-        <div className="flex-col h-full justify-center items-center w-full max-w-7xl space-y-16">
+        <div className="container max-w-7xl space-y-12 py-12">
           <h1 className="c text-2xl text-center md:text-4xl font-semibold">
             Why Choose us?
           </h1>

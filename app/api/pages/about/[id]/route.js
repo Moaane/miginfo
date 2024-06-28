@@ -1,4 +1,8 @@
-import { deleteImage, updateImage } from "@/app/api/images/[filename]/route";
+import {
+  deleteImage,
+  renameImage,
+  updateImage,
+} from "@/app/api/images/[filename]/route";
 import { CreateImage } from "@/app/api/images/route";
 import prisma from "@/utils/db";
 import { NextResponse } from "next/server";
@@ -29,7 +33,8 @@ export async function PUT(req, { params }) {
   const description = formData.get("description");
   const image = formData.get("image");
   const direction = formData.get("direction");
-  const head = formData.get("head");
+  const head = formData.get("head") === "true";
+  console.log(direction);
 
   try {
     if (head === true) {
@@ -37,7 +42,7 @@ export async function PUT(req, { params }) {
         where: { head: true },
       });
 
-      if (existingHeadPage) {
+      if (existingHeadPage && existingHeadPage.id !== id) {
         return NextResponse.json({
           status: 400,
           message: "Head section already created",
@@ -53,8 +58,10 @@ export async function PUT(req, { params }) {
           ? await updateImage(about.image.filename, image, title)
           : await CreateImage(image, title)
         : about.image
-        ? about.image
-        : null;
+        ? title !== about.image.name
+          ? await renameImage(about.image.filename, title)
+          : about.image
+        : about.image;
 
     const updatedAbout = await prisma.aboutPage.update({
       where: { id: id },
@@ -73,6 +80,7 @@ export async function PUT(req, { params }) {
       message: "About page updated successfully",
     });
   } catch (error) {
+    console.log(error);
     return NextResponse.json({
       status: 200,
       message: "Error while updating about page",

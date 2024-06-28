@@ -13,64 +13,59 @@ export async function GET(req) {
       ? { partnerCategories: { every: { categoryId: filter } } }
       : {};
 
-  let dataPromise, totalPromise;
-
   if (page) {
     const skip = page > 0 ? 10 * (page - 1) : 0;
-    dataPromise = prisma.partner.findMany({
-      where: whereCondition,
-      skip: skip,
-      take: 10,
-      orderBy: { name: "asc" },
-      include: {
-        partnerCategories: {
-          select: {
-            categories: {
-              select: {
-                name: true,
+    const [data, total] = await Promise.all([
+      prisma.partner.findMany({
+        where: whereCondition,
+        skip: skip,
+        take: 10,
+        orderBy: { name: "asc" },
+        include: {
+          partnerCategories: {
+            select: {
+              categories: {
+                select: {
+                  name: true,
+                },
               },
             },
           },
         },
+      }),
+      prisma.partner.count({ where: whereCondition }),
+    ]);
+    const lastPage = total > 10 ? Math.ceil(total / 10) : 1;
+
+    return NextResponse.json({
+      meta: {
+        total,
+        lastPage,
+        currentPage: page || 1,
+        perPage: 10 || total,
+        prev: page && page > 1 ? page - 1 : null,
+        next: page && page < lastPage ? page + 1 : null,
       },
+      data,
+      status: 200,
+      message: "Successfully get partner",
     });
   } else {
-    dataPromise = prisma.partner.findMany({
-      where: whereCondition,
-      orderBy: { name: "asc" },
+    const partners = await prisma.category.findMany({
+      where: { type: "PARTNER" },
       include: {
         partnerCategories: {
-          select: {
-            categories: {
-              select: {
-                name: true,
-              },
-            },
-          },
+          select: { partners: true },
         },
       },
     });
+
+    return NextResponse.json({
+      data: partners,
+      status: 200,
+      message: "Partners retrieved successfully",
+    });
   }
-
-  totalPromise = prisma.partner.count({ where: whereCondition });
-
-  const [data, total] = await Promise.all([dataPromise, totalPromise]);
-
-  const lastPage = total > 10 ? Math.ceil(total / 10) : 1;
-
-  return NextResponse.json({
-    meta: {
-      total,
-      lastPage,
-      currentPage: page || 1,
-      perPage: 10 || total,
-      prev: page && page > 1 ? page - 1 : null,
-      next: page && page < lastPage ? page + 1 : null,
-    },
-    data,
-    status: 200,
-    message: "Successfully get partner",
-  });
 }
 
 export async function POST(req) {

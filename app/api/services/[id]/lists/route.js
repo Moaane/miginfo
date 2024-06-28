@@ -59,6 +59,7 @@ export async function GET(req, { params }) {
       });
     }
   } catch (error) {
+    console.log(error);
     return NextResponse.json({
       status: 500,
       message: "Failed while getting service lists",
@@ -71,7 +72,7 @@ export async function POST(req, { params }) {
   const { id } = params;
 
   const formData = await req.formData();
-  const title = formData.get("title");
+  const name = formData.get("name");
   const order = parseInt(formData.get("order"));
 
   try {
@@ -87,10 +88,9 @@ export async function POST(req, { params }) {
         },
       });
     }
-
     const newList = await prisma.serviceList.create({
       data: {
-        title,
+        name,
         order,
         serviceId: id,
       },
@@ -102,6 +102,7 @@ export async function POST(req, { params }) {
       message: "Service list created successfully",
     });
   } catch (error) {
+    console.log(error);
     return NextResponse.json({
       status: 500,
       message: "Error while creating service list",

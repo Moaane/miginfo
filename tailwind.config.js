@@ -12,9 +12,12 @@ module.exports = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
+      padding: {
+        DEFAULT: "1rem",
+        sm: "2rem",
+        lg: "4rem",
+        xl: "5rem",
+        "2xl": "6rem",
       },
     },
     extend: {
@@ -34,6 +37,10 @@ module.exports = {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(-100%)" },
         },
+        "border-animation": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
         "border-spin": {
           "100%": {
             transform: "rotate(-360deg)",
@@ -41,6 +48,7 @@ module.exports = {
         },
       },
       animation: {
+        "border-animation": "border-animation 4s ease infinite",
         "loop-scroll": "loop-scroll 50s linear infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",

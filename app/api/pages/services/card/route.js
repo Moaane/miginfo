@@ -13,6 +13,7 @@ export async function GET() {
       message: "Service card retrieved successfully",
     });
   } catch (error) {
+    console.log(error);
     return NextResponse.json({
       status: 500,
       message: "Error while getting service card",

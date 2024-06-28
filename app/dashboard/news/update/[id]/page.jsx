@@ -32,6 +32,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Loader from "@/components/loader/Loader";
+import Editor from "@/components/Editor";
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -43,6 +44,7 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
+  slug: z.string().optional(),
   description: z.string().nullable(),
   category: z.string().min(1, "Category is required"),
   image: z
@@ -76,6 +78,7 @@ export default function page({ params }) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
+      slug: "",
       description: "",
       category: "",
       image: "",
@@ -91,6 +94,7 @@ export default function page({ params }) {
     try {
       const formData = new FormData();
       formData.append("title", data.title);
+      formData.append("slug", data.slug);
       formData.append("description", data.description);
       formData.append("category", data.category);
       formData.append("image", data.image[0]);
@@ -126,6 +130,7 @@ export default function page({ params }) {
       setCategory({ id: categoryId, name: categoryName });
 
       form.setValue("title", result.data.title);
+      form.setValue("slug", result.data.slug);
       form.setValue("description", result.data.description);
       form.setValue("imageName", result.data.image.name);
       if (categoryId) form.setValue("category", categoryId);
@@ -244,16 +249,19 @@ export default function page({ params }) {
                           <div className="grid gap-3">
                             <FormField
                               control={form.control}
-                              name="description"
+                              name="slug"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Description</FormLabel>
-                                  <Textarea
-                                    id="description"
-                                    className="min-h-32"
-                                    placeholder="description"
-                                    {...field}
-                                  />
+                                  <FormLabel>Slug</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      name="slug"
+                                      className="w-full"
+                                      placeholder="slug"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -301,6 +309,29 @@ export default function page({ params }) {
                                     </SelectContent>
                                   </Select>
                                   <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-red-200" x-chunk="dashboard-07-chunk-2">
+                      <CardHeader>
+                        <CardTitle>Content</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="max-w-screen-sm bg-red-100">
+                          <div className="grid gap-3">
+                            <FormField
+                              control={form.control}
+                              name="description"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <Editor
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                  />
                                 </FormItem>
                               )}
                             />

@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
-import { File, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/loader/Loader";
 import EventMenu from "@/components/dashboard/menu/EventMenu";
@@ -20,7 +20,7 @@ export default function Page() {
   async function fetchEvents(page) {
     try {
       setLoading(true);
-      const response = await fetch(`../../api/events?page=${page}`, {
+      const response = await fetch(`/api/events?page=${page}`, {
         method: "GET",
       });
 

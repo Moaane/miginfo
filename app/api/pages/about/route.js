@@ -2,10 +2,39 @@ import prisma from "@/utils/db";
 import { NextResponse } from "next/server";
 import { CreateImage } from "../../images/route";
 
-export async function GET() {
+export async function GET(req) {
+  const url = new URL(req.url);
+  const searchParams = new URLSearchParams(url.searchParams);
+  const page = parseInt(searchParams.get("page"), 10) || 1;
+  const skip = (page - 1) * 10;
+
   try {
+    if (page) {
+      const [data, total] = await Promise.all([
+        prisma.aboutPage.findMany({
+          orderBy: { head: "desc" },
+        }),
+        prisma.aboutPage.count(),
+      ]);
+      const lastPage = Math.ceil(total / 10);
+
+      return NextResponse.json({
+        meta: {
+          total,
+          lastPage,
+          currentPage: page,
+          perPage: 10,
+          prev: page > 1 ? page - 1 : null,
+          next: page < lastPage ? page + 1 : null,
+        },
+        data,
+        status: 200,
+        message: "Services retrieved successfully",
+      });
+    }
+
     const aboutPages = await prisma.aboutPage.findMany({
-      orderBy: { head: "asc" },
+      orderBy: { head: "desc" },
     });
 
     return NextResponse.json({
@@ -30,6 +59,7 @@ export async function POST(req) {
   const head = formData.get("head") === "true";
 
   try {
+    console.log(formData);
     if (head === true) {
       const existingHeadPage = await prisma.aboutPage.findFirst({
         where: { head: true },
@@ -50,7 +80,7 @@ export async function POST(req) {
       data: {
         title: title,
         description: description,
-        direction: description,
+        direction: direction,
         head: head,
         image: imageData,
       },

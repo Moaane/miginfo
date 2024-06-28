@@ -72,6 +72,7 @@ export async function DELETE(req, { params }) {
       message: "News page deleted succesfully",
     });
   } catch (error) {
+    console.log(error);
     return NextResponse.json({
       status: 500,
       message: "Error while deleting news page",

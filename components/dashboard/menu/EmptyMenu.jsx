@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import React from "react";
 
 export default function EmptyMenu({ title }) {
+  const pathname = usePathname();
+  const newPathname = `${pathname}/new`;
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <div className="flex items-center">
@@ -19,7 +21,7 @@ export default function EmptyMenu({ title }) {
           <h3 className="text-2xl font-bold tracking-tight">
             You have no {title.toLowerCase()}
           </h3>
-          <Link href={`${title}/new`} className="mt-4">
+          <Link href={newPathname} className="mt-4">
             <Button>Add {title}</Button>
           </Link>
         </div>

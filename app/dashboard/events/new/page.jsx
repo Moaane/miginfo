@@ -32,6 +32,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Loader from "@/components/loader/Loader";
+import Editor from "@/components/Editor";
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -43,6 +44,7 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
+  slug: z.string().optional(),
   description: z.string().nullable(),
   category: z.string().min(1, "Category is required"),
   image: z
@@ -71,6 +73,7 @@ export default function page() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
+      slug: "",
       description: "",
       category: "",
       image: "",
@@ -86,6 +89,7 @@ export default function page() {
     try {
       const formData = new FormData();
       formData.append("title", data.title);
+      formData.append("slug", data.slug);
       formData.append("description", data.description);
       formData.append("category", data.category);
       formData.append("image", data.image[0]);
@@ -96,11 +100,8 @@ export default function page() {
         body: formData,
       });
 
-      console.log(response);
-      
       const result = await response.json();
-      console.log(result);
-      
+
       if (result.status === 201) {
         router.back();
       }
@@ -112,7 +113,7 @@ export default function page() {
   }
 
   async function fetchCategories() {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetch("../../api/categories?filter=event", {
         method: "GET",
@@ -181,7 +182,7 @@ export default function page() {
                           <div className="grid gap-3">
                             <FormField
                               control={form.control}
-                              name="title"  
+                              name="title"
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Title</FormLabel>
@@ -201,16 +202,19 @@ export default function page() {
                           <div className="grid gap-3">
                             <FormField
                               control={form.control}
-                              name="description"
+                              name="slug"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Description</FormLabel>
-                                  <Textarea
-                                    id="description"
-                                    className="min-h-32"
-                                    placeholder="description"
-                                    {...field}
-                                  />
+                                  <FormLabel>Slug</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      name="slug"
+                                      className="w-full"
+                                      placeholder="slug"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -255,6 +259,29 @@ export default function page() {
                                     </SelectContent>
                                   </Select>
                                   <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card x-chunk="dashboard-07-chunk-2">
+                      <CardHeader>
+                        <CardTitle>Content</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="max-w-screen-sm">
+                          <div className="grid gap-3">
+                            <FormField
+                              control={form.control}
+                              name="description"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <Editor
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                  />
                                 </FormItem>
                               )}
                             />

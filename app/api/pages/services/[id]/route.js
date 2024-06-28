@@ -61,7 +61,7 @@ export async function PUT(req, { params }) {
         where: { head: true },
       });
 
-      if (existingHeadPage) {
+      if (existingHeadPage && existingHeadPage.id !== id) {
         return NextResponse.json({
           status: 400,
           message: "Head section already created",
@@ -78,9 +78,9 @@ export async function PUT(req, { params }) {
         ? title !== servicePage.image.name
           ? await renameImage(servicePage.image.filename, title)
           : servicePage.image
-        : null;
+        : servicePage.image;
 
-    if (image && image.filename) {
+    if (imageData && imageData.filename) {
       const updatedServicePage = await prisma.servicePage.update({
         where: { id: id },
         data: {
@@ -105,6 +105,7 @@ export async function PUT(req, { params }) {
       });
     }
   } catch (error) {
+    console.log(error);
     return NextResponse.json({
       status: 500,
       message: "Error while updating service page",

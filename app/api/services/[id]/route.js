@@ -4,6 +4,7 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { CreateImage } from "../../images/route";
+import { updateImage } from "../../images/[filename]/route";
 
 export async function GET(req, { params }) {
   const { id } = params;

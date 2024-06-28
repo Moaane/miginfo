@@ -107,7 +107,7 @@ export default function page({ params }) {
             type: "custom",
             message: result.message,
           });
-      }
+      }   
     } catch (error) {
       console.log("Error while updating news : ", error);
     }

@@ -21,21 +21,12 @@ import { Newspaper } from "lucide-react";
 import { Ticket } from "lucide-react";
 import { User } from "lucide-react";
 import { Handshake } from "lucide-react";
-import { BriefcaseBusiness } from "lucide-react";
-import { FileText } from "lucide-react";
-import { CircleUser } from "lucide-react";
-import { BtnSignOut } from "../auth/BtnSignOut";
-
-const serviceLinks = [
-  {
-    slug: "web-development",
-    name: "Web Developer",
-  },
-  {
-    slug: "app-development",
-    name: "App Developer",
-  },
-];
+import { useEffect, useState } from "react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../ui/collapsible";
 
 const variantButton = {
   full: {
@@ -59,11 +50,10 @@ const variantButton = {
 export default function Navbar() {
   const pathname = usePathname();
 
-
   return (
     <>
-      <nav className="hidden md:block fixed inset-x-0 top-0 z-50 bg-white shadow dark:bg-gray-950">
-        <div className="container max-w-7xl px-4 lg:px-8 xl:px-20">
+      <nav className="hidden lg:flex sticky top-0 z-[51] bg-red-100 dark:bg-gray-950">
+        <div className="container max-w-7xl bg-red-200">
           <div className="flex py-8 items-center">
             <Link
               className="mr-auto flex items-center gap-2 text-lg font-semibold"
@@ -83,20 +73,15 @@ export default function Navbar() {
               <NavLink pathname={pathname} href="/about" text="Tentang kami" />
               <DropdownMenuComponent pathname={pathname} />
               <NavLink pathname={pathname} href="/news" text="News & Events" />
-              <NavLink
-                pathname={pathname}
-                href="/portofolio"
-                text="Portofolio"
-              />
               <NavLink pathname={pathname} href="/client" text="Klien" />
               <NavLink pathname={pathname} href="/partner" text="Partner" />
-              <NavLink pathname={pathname} href="/career" text="Career" />
+              <NavLink pathname={pathname} href="/career" text="Karir" />
               <NavLink pathname={pathname} href="/contact" text="Kontak" />
             </nav>
           </div>
         </div>
       </nav>
-      <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+      <header className="flex lg:hidden h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
         <Link
           className="mr-auto flex items-center gap-2 text-lg font-semibold"
           href="/"
@@ -112,140 +97,20 @@ export default function Navbar() {
         </Link>
         <Sheet>
           <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="shrink-0 md:hidden"
-            >
+            <Button variant="outline" size="icon" className="shrink-0">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle navigation menu</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="flex flex-col">
-            <nav className="grid gap-2 text-lg font-medium">
-              <Link
-                href="/dashboard"
-                className={
-                  pathname === "/dashboard"
-                    ? variantButton.small.active
-                    : variantButton.small.default
-                }
-              >
-                <Home className="h-4 w-4" />
-                Dashboard
-              </Link>
-              <Link
-                href="/dashboard/services"
-                className={
-                  pathname.startsWith("/dashboard/services")
-                    ? variantButton.small.active
-                    : variantButton.small.default
-                }
-              >
-                <HandHeart className="h-4 w-4" />
-                Services
-              </Link>
-              <Link
-                href="/dashboard/categories"
-                className={
-                  pathname.startsWith("/dashboard/categories")
-                    ? variantButton.small.active
-                    : variantButton.small.default
-                }
-              >
-                <Boxes className="h-4 w-4" />
-                Categories
-              </Link>
-              <Link
-                href="/dashboard/news"
-                className={
-                  pathname.startsWith("/dashboard/news")
-                    ? variantButton.small.active
-                    : variantButton.small.default
-                }
-              >
-                <Newspaper className="h-4 w-4" />
-                News
-              </Link>
-              <Link
-                href="/dashboard/events"
-                className={
-                  pathname.startsWith("/dashboard/events")
-                    ? variantButton.small.active
-                    : variantButton.small.default
-                }
-              >
-                <Ticket className="h-4 w-4" />
-                Events
-              </Link>
-              <Link
-                href="/dashboard/clients"
-                className={
-                  pathname.startsWith("/dashboard/clients")
-                    ? variantButton.small.active
-                    : variantButton.small.default
-                }
-              >
-                <User className="h-4 w-4" />
-                Clients
-              </Link>
-              <Link
-                href="/dashboard/partners"
-                className={
-                  pathname.startsWith("/dashboard/partners")
-                    ? variantButton.small.active
-                    : variantButton.small.default
-                }
-              >
-                <Handshake className="h-4 w-4" />
-                Partners
-              </Link>
-              <Link
-                href=""
-                className={variantButton.small.disabled}
-                // className={
-                //   pathname === "/dashboard/services"
-                //     ? variantButton.small.active
-                //     : variantButton.small.default
-                // }
-              >
-                <BriefcaseBusiness className="h-4 w-4" />
-                Careers
-              </Link>
-              <Link
-                href=""
-                className={variantButton.small.disabled}
-                // className={
-                //   pathname === "/dashboard/services"
-                //     ? variantButton.small.active
-                //     : variantButton.small.default
-                // }
-              >
-                <FileText className="h-4 w-4" />
-                Portofolios
-              </Link>
-              {/* <Link
-                href="dashboard/portofolios"
-                className={
-                  pathname === "/dashboard/portofolios"
-                  ? variantButton.small.active
-                  : variantButton.small.default
-                }
-                >
-                <FileText className="h-4 w-4" />
-                Portofolios
-              </Link> */}
-              <Link
-                href="/dashboard/settings"
-                className={
-                  pathname.startsWith("/dashboard/settings")
-                    ? variantButton.full.active
-                    : variantButton.full.default
-                }
-              >
-                <Handshake className="h-4 w-4" />
-                Settings
-              </Link>
+            <nav className="grid gap-2 font-medium">
+              <NavLink pathname={pathname} href="/" text="Beranda" />
+              <NavLink pathname={pathname} href="/about" text="Tentang kami" />
+              <DropdownMenuComponent pathname={pathname} />
+              <NavLink pathname={pathname} href="/news" text="News & Events" />
+              <NavLink pathname={pathname} href="/client" text="Klien" />
+              <NavLink pathname={pathname} href="/partner" text="Partner" />
+              <NavLink pathname={pathname} href="/contact" text="Kontak" />
             </nav>
           </SheetContent>
         </Sheet>
@@ -270,40 +135,103 @@ function NavLink({ pathname, href, text }) {
 }
 
 function DropdownMenuComponent({ pathname }) {
+  const [serviceLinks, setServiceLinks] = useState([]);
+
+  async function fetchServiceLinks() {
+    try {
+      const response = await fetch("/api/pages/services/nav", {
+        method: "GET",
+      });
+      const result = await response.json();
+      setServiceLinks(result.data);
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchServiceLinks();
+  }, []);
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className="flex items-center gap-1 group">
-            <Link
-              href="/services"
-              className={`font-medium text-sm border-b-2 transition-colors hover:text-primary hover:border-primary ${
+      <div className="hidden lg:block">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex items-center gap-1 group">
+              <Link
+                href="/services"
+                className={`font-medium text-sm border-b-2 transition-colors hover:text-primary hover:border-primary ${
+                  pathname.startsWith("/services")
+                    ? "text-primary border-primary"
+                    : "text-black border-transparent"
+                }`}
+              >
+                Layanan
+              </Link>
+              <ChevronDown className="h-3 w-3 group-checked:rotate-90" />
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="mt-8">
+            <DropdownMenuItem className="cursor-pointer" asChild>
+              <Link pathname={pathname} href="/services">
+                Tentang Layanan
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {serviceLinks?.map((service, index) => (
+              <DropdownMenuItem key={index} className="cursor-pointer" asChild>
+                <Link pathname={pathname} href={`/services/${service.slug}`}>
+                  {service.name}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className="lg:hidden">
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <div
+              className={`flex items-center gap-1 group font-medium text-sm border-b-2 transition-colors hover:text-primary hover:border-primary ${
                 pathname.startsWith("/services")
                   ? "text-primary border-primary"
                   : "text-black border-transparent"
               }`}
             >
               Layanan
-            </Link>
-            <ChevronDown className="h-3 w-3 group-checked:rotate-90" />
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="mt-8">
-          <DropdownMenuItem className="cursor-pointer" asChild>
-            <Link pathname={pathname} href="/services">
+              <ChevronDown className="h-3 w-3 group-checked:rotate-90" />
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2 grid gap-2">
+            <Link
+              href="/services"
+              className={`font-medium text-sm border-b-2 transition-colors hover:text-primary hover:border-primary ${
+                pathname === "/services"
+                  ? "text-primary border-primary"
+                  : "text-black border-transparent"
+              }`}
+            >
               Tentang Layanan
             </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {serviceLinks.map((service, index) => (
-            <DropdownMenuItem key={index} className="cursor-pointer" asChild>
-              <Link pathname={pathname} href={`/services/${service.slug}`}>
+
+            {serviceLinks?.map((service, index) => (
+              <Link
+                href={`/services/${service.slug}`}
+                key={index}
+                className={`flex items-center gap-1 group font-medium text-sm border-b-2 transition-colors hover:text-primary hover:border-primary ${
+                  pathname === `/services/${service.slug}`
+                    ? "text-primary border-primary"
+                    : "text-black border-transparent"
+                }`}
+              >
                 {service.name}
               </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
     </>
   );
 }
