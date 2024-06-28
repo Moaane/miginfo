@@ -46,7 +46,7 @@ export default function Page() {
   async function handleDelete(id) {
     setLoading(true);
     try {
-      const response = await fetch(`../../api/application/${id}`, {
+      const response = await fetch(`/api/application/${id}`, {
         method: "DELETE",
       });
 
