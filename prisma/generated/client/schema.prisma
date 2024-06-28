@@ -1,0 +1,372 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  // provider = "mysql"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id   String @id @default(cuid())
+  name String
+
+  users       User[]
+  permissions Permission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id     String  @id @default(cuid())
+  name   String
+  roleId String?
+
+  Role Role? @relation(fields: [roleId], references: [id])
+
+  @@map("permissions")
+}
+
+model User {
+  id       String  @id @default(cuid())
+  username String  @unique
+  password String
+  roleId   String? @map("role_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  News     News[]
+  Sessions Session[]
+  Roles    Role?     @relation(fields: [roleId], references: [id])
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @unique @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+enum CategoryTypes {
+  SERVICE
+  PARTNER
+  CLIENT
+  NEWS
+  EVENT
+}
+
+model Category {
+  id   String        @id @default(cuid())
+  name String
+  type CategoryTypes
+
+  serviceCategories ServiceCategory[]
+  partnerCategories PartnerCategory[]
+  clientCategories  ClientCategory[]
+  newsCategorries   NewsCategory[]
+  eventCategories   EventCategory[]
+}
+
+model Service {
+  id          String  @id @default(cuid())
+  name        String
+  description String  @db.Text
+  slug        String  @unique
+  image       Json?
+  icon        Json?
+  onSection   Boolean @default(false) @map("on_section")
+  status      Boolean
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  serviceLists      ServiceList[]
+  serviceCategories ServiceCategory[]
+
+  @@map("services")
+}
+
+model ServiceList {
+  id        String  @id @default(cuid())
+  name      String
+  order     Int
+  serviceId String? @map("service_id")
+
+  Services Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("services_list")
+}
+
+model ServiceCategory {
+  serviceId  String
+  categoryId String
+
+  services   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  categories Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([serviceId, categoryId])
+  @@unique([serviceId, categoryId])
+  @@map("service_categories")
+}
+
+model Partner {
+  id    String @id @default(cuid())
+  name  String
+  image Json?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  partnerCategories PartnerCategory[]
+
+  @@map("partners")
+}
+
+model PartnerCategory {
+  partnerId  String
+  categoryId String
+
+  partners   Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  categories Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([partnerId, categoryId])
+  @@unique([partnerId, categoryId])
+  @@map("partner_categories")
+}
+
+model Client {
+  id    String @id @default(cuid())
+  name  String
+  image Json?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  clientCategories ClientCategory[]
+
+  @@map("clients")
+}
+
+model ClientCategory {
+  clientId   String @map("client_id")
+  categoryId String @map("category_id")
+
+  clients    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  categories Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([clientId, categoryId])
+  @@unique([clientId, categoryId])
+  @@map("client_categories")
+}
+
+enum NewsTypes {
+  NEWS
+  EVENT
+}
+
+model News {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  description String    @db.Text
+  image       Json?
+  userId      String    @map("user_id")
+  type        NewsTypes @default(NEWS)
+
+  users     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  newsCategories  NewsCategory[]
+  eventCategories EventCategory[]
+
+  @@map("news")
+}
+
+model NewsCategory {
+  newsId     String @map("news_id")
+  categoryId String @map("category_id")
+
+  news       News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  categories Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([newsId, categoryId])
+  @@unique([newsId, categoryId])
+  @@map("news_categories")
+}
+
+model EventCategory {
+  eventId    String @map("news_id")
+  categoryId String @map("category_id")
+
+  events     News     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  categories Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, categoryId])
+  @@unique([eventId, categoryId])
+  @@map("event_categories")
+}
+
+model Portofolio {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  imageUrl String?
+
+  @@map("portofolios")
+}
+
+model Carousel {
+  id     String  @id @default(cuid())
+  title  String
+  image  Json?
+  status Boolean @default(true)
+
+  @@map("caraousel")
+}
+
+model Team {
+  id       String  @id @default(cuid())
+  name     String
+  position String
+  order    Int
+  image    Json?
+  twitter  String?
+  facebook String?
+  email    String?
+  linkedin String?
+
+  @@map("teams")
+}
+
+model ServicePage {
+  id          String  @id @default(cuid())
+  title       String
+  description String  @db.Text
+  image       Json?
+  direction   String
+  head        Boolean @default(false)
+
+  @@map("service_pages")
+}
+
+model AboutPage {
+  id          String  @id @default(cuid())
+  title       String
+  description String  @db.Text
+  image       Json?
+  direction   String
+  head        Boolean @default(false)
+
+  @@map("about_pages")
+}
+
+model NewsPage {
+  id          String @id @default(cuid())
+  title       String
+  description String @db.Text
+
+  @@map("news_pages")
+}
+
+model Question {
+  id          String @id @default(cuid())
+  title       String
+  description String @db.Text
+
+  @@map("questions")
+}
+
+model Feature {
+  id          String @id @default(cuid())
+  title       String
+  description String @db.Text
+
+  @@map("features")
+}
+
+enum JobModel {
+  WFO
+  WFH
+  HYBRID
+}
+
+enum JobType {
+  FULLTIME
+  PARTTIME
+  INTERN
+}
+
+model Career {
+  id             String   @id @default(cuid())
+  position       String
+  description    String   @db.Text
+  requirement    String   @db.Text
+  responsibility String   @db.Text
+  benefit        String   @db.Text
+  howToApply     String   @db.Text
+  type           JobType
+  model          JobModel
+  active         Boolean
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  applications Application[]
+
+  @@map("careers")
+}
+
+model Application {
+  id              String  @id @default(cuid())
+  fullname        String  @map("full_name")
+  gender          String
+  placeBirth      String  @map("place_birth")
+  dateBirth       String  @map("date_birth")
+  religion        String
+  province        String
+  regency         String
+  district        String
+  village         String
+  address         String
+  formalEducation String  @map("formal_education")
+  institution     String
+  faculty         String
+  major           String
+  gpa             Float
+  marital         Boolean
+  email           String
+  idCard          String
+  phoneNumber     String  @map("phone_number")
+
+  // recent work
+  company       String?
+  companyCity   String? @map("company_city")
+  lengthWork    String? @map("length_work")
+  position      String?
+  reasonLeaving String? @map("reason_leaving")
+
+  careerId String?
+  resume   Json?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  careers Career? @relation(fields: [careerId], references: [id])
+
+  @@map("applications")
+}
