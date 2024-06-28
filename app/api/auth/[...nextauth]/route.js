@@ -5,21 +5,25 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/utils/db";
-import { decode, encode } from "next-auth/jwt";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
 export const authOptions = {
   pages: {
     signIn: "/sign-in",
+    error: "/auth/error",
   },
   session: {
     strategy: "jwt",
-    generateSessionToken: false,
     maxAge: 24 * 60 * 60,
+    generateSessionToken: () => {
+      return randomUUID?.() ?? randomBytes(32).toString("hex");
+    },
   },
   jwt: {
-    secret: secret,
+    maxAge: 60 * 60 * 24 * 30,
+    async encode() {},
+    async decode() {},
   },
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -112,7 +116,6 @@ export const authOptions = {
       });
     },
   },
-  debug: true,
   secret: process.env.NEXTAUTH_SECRET,
 };
 

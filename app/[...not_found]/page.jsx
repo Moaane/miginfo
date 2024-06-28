@@ -1,7 +1,9 @@
-import React from 'react'
+import React from "react";
 
 export default function page() {
   return (
-    <div><h1>NOTFOUND</h1></div>
-  )
+    <div className="min-h-screen flex justify-center items-center">
+      <h1 className="font-bold text-5xl">NOTFOUND</h1>
+    </div>
+  );
 }
