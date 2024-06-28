@@ -1,6 +1,6 @@
-import prisma from "@/utils/db";
 import { NextResponse } from "next/server";
 import { deleteImage } from "../../images/[filename]/route";
+import prisma from "@/utils/db";
 
 export async function GET(req, { params }) {
   const { id } = params;
