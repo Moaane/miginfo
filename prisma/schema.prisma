@@ -9,7 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  // provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -82,7 +83,7 @@ model Category {
 model Service {
   id          String  @id @default(cuid())
   name        String
-  description String  @db.LongText
+  description String  @db.Text
   slug        String  @unique
   image       Json?
   icon        Json?
@@ -180,7 +181,7 @@ model News {
   id          String    @id @default(cuid())
   title       String
   slug        String    @unique
-  description String    @db.LongText
+  description String    @db.Text
   image       Json?
   userId      String    @map("user_id")
   type        NewsTypes @default(NEWS)
@@ -312,11 +313,11 @@ enum JobType {
 model Career {
   id             String   @id @default(cuid())
   position       String
-  description    String   @db.LongText
-  requirement    String   @db.LongText
-  responsibility String   @db.LongText
-  benefit        String   @db.LongText
-  howToApply     String   @db.LongText
+  description    String   @db.Text
+  requirement    String   @db.Text
+  responsibility String   @db.Text
+  benefit        String   @db.Text
+  howToApply     String   @db.Text
   type           JobType
   model          JobModel
   active         Boolean
