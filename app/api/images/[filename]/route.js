@@ -3,7 +3,7 @@ import path from "path";
 import fs, { readdir, rename, unlink, writeFile } from "fs/promises";
 import mime from "mime-types";
 
-const UPLOAD_DIR = path.resolve("./uploads");
+const UPLOAD_DIR = path.resolve("./public");
 
 export async function GET(req, { params }) {
   const { filename } = params;

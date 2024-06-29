@@ -3,7 +3,7 @@ import path from "path";
 import mime from "mime-types";
 import { readdir, writeFile } from "fs/promises";
 
-const UPLOAD_DIR = path.resolve("./uploads");
+const UPLOAD_DIR = path.resolve("./public");
 
 export async function CreateImage(image, imageName) {
   try {
