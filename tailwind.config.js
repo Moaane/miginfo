@@ -48,7 +48,7 @@ module.exports = {
         },
       },
       animation: {
-        "border-animation": "border-animation 4s ease infinite",
+        "border-animation": "border-animationz 4s ease infinite",
         "loop-scroll": "loop-scroll 50s linear infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",

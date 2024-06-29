@@ -15,9 +15,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
+import { doLogin } from "../actions";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 const formSchema = z.object({
   username: z
@@ -43,30 +51,35 @@ export default function SignInPage() {
     },
   });
 
-  const onSubmit = async (data) => {
+  async function onSubmit(data) {
     try {
       setLoading(true);
-      const result = await signIn("credentials", {
-        ...data,
+      const formData = new FormData();
+      formData.append("username", data.username);
+      formData.append("password", data.password);
+
+      const response = await signIn("credentials", {
+        username: data.username,
+        password: data.password,
         redirect: false,
       });
-
-      if (result.ok) {
-        toast.success("Login successful!");
-        router.push("/dashboard");
-      } else {
-        const errorMessage = new URLSearchParams(result.error).get("error");
-        toast.error(
-          errorMessage ||
-            "Login failed. Please check your credentials and try again."
-        );
+      const result = await response.json();
+      console.log(result);
+      switch (result.status) {
+        case 200:
+          toast.success("Login successful!");
+          router.push("/dashboard");
+          break;
+        default:
+          toast.error("Unexpected error during login. Please try again later.");
+          break;
       }
     } catch (error) {
       toast.error("Unexpected error during login. Please try again later.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -83,50 +96,64 @@ export default function SignInPage() {
             Enter your username and password to login to your account.
           </CardDescription>
         </CardHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="username"
-                {...form.register("username")}
-              />
-              {form.formState.errors.username && (
-                <p className="text-red-500">
-                  {form.formState.errors.username.message}
-                </p>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="grid gap-4">
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input
+                          name="username"
+                          type="text"
+                          placeholder="username"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          name="password"
+                          type="password"
+                          placeholder="password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              {loading ? (
+                <Button className="w-full" disabled>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Please wait
+                </Button>
+              ) : (
+                <Button className="w-full" type="submit">
+                  Sign in
+                </Button>
               )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="password"
-                {...form.register("password")}
-              />
-              {form.formState.errors.password && (
-                <p className="text-red-500">
-                  {form.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter>
-            {loading ? (
-              <Button className="w-full" disabled>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Please wait
-              </Button>
-            ) : (
-              <Button className="w-full" type="submit">
-                Sign in
-              </Button>
-            )}
-          </CardFooter>
-        </form>
+            </CardFooter>
+          </form>
+        </Form>
       </Card>
     </div>
   );
