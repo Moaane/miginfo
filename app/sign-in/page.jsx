@@ -17,7 +17,6 @@ import {
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
-import { doLogin } from "../actions";
 import {
   Form,
   FormControl,
@@ -63,16 +62,10 @@ export default function SignInPage() {
         password: data.password,
         redirect: false,
       });
-      const result = await response.json();
-      console.log(result);
-      switch (result.status) {
-        case 200:
-          toast.success("Login successful!");
-          router.push("/dashboard");
-          break;
-        default:
-          toast.error("Unexpected error during login. Please try again later.");
-          break;
+
+      if (response) {
+        toast.success("Login successful!");
+        router.push("/dashboard");
       }
     } catch (error) {
       toast.error("Unexpected error during login. Please try again later.");

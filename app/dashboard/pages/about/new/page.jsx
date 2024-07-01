@@ -220,7 +220,11 @@ export default function page() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Direction</FormLabel>
-                                  <Select defaultValue={field.value}>
+                                  <Select
+                                    onValueChange={(value) =>
+                                      field.onChange(value)
+                                    }
+                                  >
                                     <FormControl>
                                       <SelectTrigger
                                         id="direction"

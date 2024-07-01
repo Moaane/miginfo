@@ -21,7 +21,7 @@ export async function GET(req, { params }) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while getting news",
+      error: "Error while getting news",
     });
   }
 }

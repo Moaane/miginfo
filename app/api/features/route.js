@@ -3,8 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
-    const url = new URL(req.url);
-    const searchParams = new URLSearchParams(url.searchParams);
+    const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page"), 10);
 
     if (page) {
@@ -45,7 +44,7 @@ export async function GET(req) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while retrieving features",
+      error: "Error while retrieving features",
     });
   }
 }
@@ -56,17 +55,10 @@ export async function POST(req) {
     const title = formData.get("title");
     const description = formData.get("description");
 
-    if (!title || !description) {
-      return NextResponse.json({
-        status: 400,
-        message: "Title or description is missing",
-      });
-    }
-
     const newFeature = await prisma.feature.create({
       data: {
-        title,
-        description,
+        title: title,
+        description: description,
       },
     });
 
@@ -78,7 +70,7 @@ export async function POST(req) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while creating new feature",
+      error: "Error while creating new feature",
     });
   }
 }

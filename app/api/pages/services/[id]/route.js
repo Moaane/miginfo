@@ -2,8 +2,8 @@ import {
   deleteImage,
   renameImage,
   updateImage,
-} from "@/app/api/images/[filename]/route";
-import { CreateImage } from "@/app/api/images/route";
+} from "@/app/api/images/[url]/route";
+import { CreateImage, DeleteImage, UpdateImage } from "@/app/api/images/route";
 import prisma from "@/utils/db";
 import { NextResponse } from "next/server";
 
@@ -18,7 +18,7 @@ export async function GET(req, { params }) {
     if (!servicePage) {
       return NextResponse.json({
         status: 404,
-        message: "Service page not found",
+        error: "Service page not found",
       });
     }
 
@@ -30,7 +30,7 @@ export async function GET(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while getting servie pageF",
+      error: "Error while getting servie pageF",
     });
   }
 }
@@ -64,7 +64,7 @@ export async function PUT(req, { params }) {
       if (existingHeadPage && existingHeadPage.id !== id) {
         return NextResponse.json({
           status: 400,
-          message: "Head section already created",
+          error: "Head section already created",
         });
       }
     }
@@ -72,43 +72,31 @@ export async function PUT(req, { params }) {
     const imageData =
       image && image instanceof Blob
         ? servicePage.image
-          ? await updateImage(servicePage.image.filename, image, title)
+          ? await UpdateImage(servicePage.image.url, image, title)
           : await CreateImage(image, title)
-        : servicePage.image
-        ? title !== servicePage.image.name
-          ? await renameImage(servicePage.image.filename, title)
-          : servicePage.image
         : servicePage.image;
 
-    if (imageData && imageData.filename) {
-      const updatedServicePage = await prisma.servicePage.update({
-        where: { id: id },
-        data: {
-          title: title,
-          description: description,
-          direction: direction,
-          head: head,
-          image: imageData,
-        },
-      });
+    const updatedServicePage = await prisma.servicePage.update({
+      where: { id: id },
+      data: {
+        title: title,
+        description: description,
+        direction: direction,
+        head: head,
+        image: imageData,
+      },
+    });
 
-      return NextResponse.json({
-        data: updatedServicePage,
-        status: 200,
-        message: "Service page updated successfully",
-      });
-    } else {
-      const result = await imageData.json();
-      return NextResponse.json({
-        status: result.status,
-        message: result.message,
-      });
-    }
+    return NextResponse.json({
+      data: updatedServicePage,
+      status: 200,
+      message: "Service page updated successfully",
+    });
   } catch (error) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while updating service page",
+      error: "Error while updating service page",
     });
   }
 }
@@ -122,7 +110,7 @@ export async function DELETE(req, { params }) {
     });
 
     deletedServicePage.image
-      ? await deleteImage(deletedServicePage.image.filename)
+      ? await DeleteImage(deletedServicePage.image.url)
       : null;
 
     return NextResponse.json({
@@ -132,7 +120,7 @@ export async function DELETE(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while deleting service page",
+      error: "Error while deleting service page",
     });
   }
 }

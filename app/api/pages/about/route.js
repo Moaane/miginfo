@@ -6,12 +6,14 @@ export async function GET(req) {
   const url = new URL(req.url);
   const searchParams = new URLSearchParams(url.searchParams);
   const page = parseInt(searchParams.get("page"), 10) || 1;
-  const skip = (page - 1) * 10;
 
   try {
     if (page) {
+      const skip = page > 0 ? 10 * (page - 1) : 0;
       const [data, total] = await Promise.all([
         prisma.aboutPage.findMany({
+          skip,
+          take: 10,
           orderBy: { head: "desc" },
         }),
         prisma.aboutPage.count(),
@@ -20,14 +22,14 @@ export async function GET(req) {
 
       return NextResponse.json({
         meta: {
-          total,
-          lastPage,
+          total: total,
+          lastPage: lastPage,
           currentPage: page,
           perPage: 10,
           prev: page > 1 ? page - 1 : null,
           next: page < lastPage ? page + 1 : null,
         },
-        data,
+        data: data,
         status: 200,
         message: "Services retrieved successfully",
       });
@@ -45,7 +47,7 @@ export async function GET(req) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while retrieving about pages",
+      error: "Error while retrieving about pages",
     });
   }
 }
@@ -59,7 +61,6 @@ export async function POST(req) {
   const head = formData.get("head") === "true";
 
   try {
-    console.log(formData);
     if (head === true) {
       const existingHeadPage = await prisma.aboutPage.findFirst({
         where: { head: true },
@@ -94,7 +95,7 @@ export async function POST(req) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while creating about page",
+      error: "Error while creating about page",
     });
   }
 }

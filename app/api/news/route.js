@@ -4,8 +4,7 @@ import { CreateImage } from "../images/route";
 import { getToken } from "next-auth/jwt";
 
 export async function GET(req) {
-  const url = new URL(req.url);
-  const searchParams = new URLSearchParams(url.searchParams);
+  const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page"), 10);
 
   try {
@@ -35,8 +34,8 @@ export async function GET(req) {
 
       return NextResponse.json({
         meta: {
-          total,
-          lastPage,
+          total: total,
+          lastPage: lastPage,
           currentPage: page,
           perPage: 10,
           prev: page > 1 ? page - 1 : null,
@@ -71,36 +70,7 @@ export async function GET(req) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while getting news",
-    });
-  }
-}
-
-export async function getNews() {
-  try {
-    const news = await prisma.news.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        newsCategories: {
-          select: {
-            categories: {
-              select: { name: true },
-            },
-          },
-        },
-      },
-    });
-    return NextResponse.json({
-      data: news,
-      status: 200,
-      message: "News is retrieved successfully",
-    });
-  } catch (error) {
-    return NextResponse.json({
-      status: 500,
-      message: "Error while getting news",
+      error: "Error while getting news",
     });
   }
 }
@@ -117,13 +87,15 @@ export async function POST(req) {
 
   const formData = await req.formData();
   const title = formData.get("title");
-  let slug = formData.get("slug");
+  const slug = (formData.get("slug") || title)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
   const description = formData.get("description");
   const categoryId = formData.get("category");
   const image = formData.get("image");
-  let imageName = formData.get("imageName");
-  imageName = imageName || title;
-  slug = slug || title.toLowerCase().replace(/\s+/g, "-");
+  const imageName = (formData.get("imageName") || title)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
   const userId = token.sub;
 
   try {
@@ -134,7 +106,7 @@ export async function POST(req) {
     if (existingNews) {
       return NextResponse.json({
         status: 400,
-        message: "Slug already been used",
+        error: "Slug already been used",
       });
     }
 
@@ -170,7 +142,7 @@ export async function POST(req) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while creating service",
+      error: "Error while creating service",
     });
   }
 }

@@ -3,21 +3,21 @@ import prisma from "@/utils/db";
 import { CreateImage } from "../images/route";
 
 export async function GET(req) {
-  const url = new URL(req.url);
-  const searchParams = new URLSearchParams(url.searchParams);
-  const page = parseInt(searchParams.get("page"), 10) || 1;
+  const { searchParams } = new URL(req.url);
+  const page = parseInt(searchParams.get("page"), 10);
   const filter = searchParams.get("filter");
-  const skip = (page - 1) * 10;
-
-  const whereClause =
-    filter === "onSection"
-      ? { onSection: true }
-      : filter === "published"
-      ? { status: true }
-      : {};
 
   try {
+    const whereClause =
+      filter === "onSection"
+        ? { onSection: true }
+        : filter === "published"
+        ? { status: true }
+        : {};
+
     if (page) {
+      const skip = page ? (page > 0 ? 10 * (page - 1) : 0) : 0;
+
       const [data, total] = await Promise.all([
         prisma.service.findMany({
           where: whereClause,
@@ -34,35 +34,35 @@ export async function GET(req) {
       ]);
 
       const lastPage = Math.ceil(total / 10);
-
       return NextResponse.json({
         meta: {
-          total,
-          lastPage,
+          total: total,
+          lastPage: lastPage,
           currentPage: page,
           perPage: 10,
           prev: page > 1 ? page - 1 : null,
           next: page < lastPage ? page + 1 : null,
         },
-        data,
-        status: 200,
-        message: "Services retrieved successfully",
-      });
-    } else {
-      const services = await prisma.service.findMany({
-        select: { name: true, slug: true, id: true },
-      });
-
-      return NextResponse.json({
-        data: services,
+        data: data,
         status: 200,
         message: "Services retrieved successfully",
       });
     }
+
+    const services = await prisma.service.findMany({
+      where: whereClause,
+      select: { name: true, slug: true, id: true },
+    });
+
+    return NextResponse.json({
+      data: services,
+      status: 200,
+      message: "Services retrieved successfully",
+    });
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while getting services",
+      error: "Error while getting services",
     });
   }
 }
@@ -70,16 +70,18 @@ export async function GET(req) {
 export async function POST(req) {
   const formData = await req.formData();
   const title = formData.get("title");
-  let slug = formData.get("slug");
+  const slug = (formData.get("slug") || title)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
   const description = formData.get("description");
   const categoryId = formData.get("category");
   const onSection = formData.get("onSection") === "true";
   const status = formData.get("status") === "true";
   const icon = formData.get("icon");
   const image = formData.get("image");
-  let imageName = formData.get("imageName");
-  imageName = imageName || title;
-  slug = slug || title.toLowerCase().replace(/\s+/g, "-");
+  const imageName = (formData.get("imageName") || title)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
   const iconName = `${imageName}-icon`;
 
   try {
@@ -90,7 +92,7 @@ export async function POST(req) {
     if (existingService) {
       return NextResponse.json({
         status: 400,
-        message: "Slug is already created",
+        error: "Slug is already created",
       });
     }
 
@@ -128,7 +130,7 @@ export async function POST(req) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while creating service",
+      error: "Error while creating service",
     });
   }
 }

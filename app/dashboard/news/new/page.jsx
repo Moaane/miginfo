@@ -149,7 +149,7 @@ export default function page() {
       {loading ? (
         <Loader />
       ) : (
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+        <main className="grid mt-6 flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -175,9 +175,6 @@ export default function page() {
                     <Card x-chunk="dashboard-07-chunk-0">
                       <CardHeader>
                         <CardTitle>News Details</CardTitle>
-                        {/* <CardDescription>
-                          Lipsum dolor sit amet, consectetur adipiscing elit
-                        </CardDescription> */}
                       </CardHeader>
                       <CardContent>
                         <div className="grid gap-6">
@@ -268,12 +265,12 @@ export default function page() {
                         </div>
                       </CardContent>
                     </Card>
-                    <Card className="bg-red-200" x-chunk="dashboard-07-chunk-2">
+                    <Card x-chunk="dashboard-07-chunk-2">
                       <CardHeader>
                         <CardTitle>Content</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="max-w-screen-sm bg-red-100">
+                        <div className="max-w-screen-sm">
                           <div className="grid gap-3">
                             <FormField
                               control={form.control}

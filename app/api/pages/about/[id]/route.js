@@ -2,7 +2,7 @@ import {
   deleteImage,
   renameImage,
   updateImage,
-} from "@/app/api/images/[filename]/route";
+} from "@/app/api/images/[url]/route";
 import { CreateImage } from "@/app/api/images/route";
 import prisma from "@/utils/db";
 import { NextResponse } from "next/server";

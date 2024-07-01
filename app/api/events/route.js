@@ -4,17 +4,12 @@ import { CreateImage } from "../images/route";
 import { getToken } from "next-auth/jwt";
 
 export async function GET(req) {
-  const url = new URL(req.url);
-  const searchParams = new URLSearchParams(url.searchParams);
+  const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page"), 10);
-  const skip = page > 0 ? 10 * (page - 1) : 0;
-
-  let data;
-  let total;
-  let lastPage;
 
   try {
-    [data, total] = await Promise.all([
+    const skip = page > 0 ? 10 * (page - 1) : 0;
+    const [data, total] = await Promise.all([
       prisma.news.findMany({
         where: { type: "EVENT" },
         skip: skip,
@@ -34,25 +29,25 @@ export async function GET(req) {
       }),
       prisma.news.count({ where: { type: "EVENT" } }),
     ]);
-    lastPage = Math.ceil(total / 10);
+    const lastPage = Math.ceil(total / 10);
 
     return NextResponse.json({
       meta: {
-        total,
-        lastPage,
+        total: total,
+        lastPage: lastPage,
         currentPage: page,
         perPage: 10,
         prev: page > 1 ? page - 1 : null,
         next: page < lastPage ? page + 1 : null,
       },
-      data,
+      data: data,
       status: 200,
       message: "Events get successfully",
     });
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Failed while getting events",
+      error: "Failed while getting events",
     });
   }
 }
@@ -69,13 +64,15 @@ export async function POST(req) {
 
   const formData = await req.formData();
   const title = formData.get("title");
-  let slug = formData.get("slug");
+  const slug = (formData.get("slug") || title)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
   const description = formData.get("description");
   const categoryId = formData.get("category");
   const image = formData.get("image");
-  let imageName = formData.get("imageName");
-  imageName = imageName || title;
-  slug = slug || title.toLowerCase().replace(/\s+/g, "-");
+  const imageName = (formData.get("imageName") || title)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
   const userId = token.sub;
 
   try {
@@ -86,7 +83,7 @@ export async function POST(req) {
     if (existingEvent) {
       return NextResponse.json({
         status: 400,
-        message: "Slug already been used",
+        error: "Slug already been used",
       });
     }
 
@@ -128,7 +125,7 @@ export async function POST(req) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while creating event",
+      error: "Error while creating event",
     });
   }
 }

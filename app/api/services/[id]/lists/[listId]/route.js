@@ -10,6 +10,10 @@ export async function GET(req, { params }) {
   try {
     const list = await prisma.serviceList.findUnique({ where: { id: listId } });
 
+    if (!list) {
+      return NextResponse.json({ status: 404, error: "list not found" });
+    }
+
     return NextResponse.json({
       data: list,
       status: 200,
@@ -18,14 +22,13 @@ export async function GET(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while getting service list",
+      error: "internal server error",
     });
   }
 }
 
 export async function PUT(req, { params }) {
   const { listId } = params;
-
   const formData = await req.formData();
   const title = formData.get("title");
   const order = parseInt(formData.get("order"));
@@ -60,7 +63,7 @@ export async function PUT(req, { params }) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while updating service list",
+      error: "internal server error",
     });
   }
 }
@@ -87,7 +90,7 @@ export async function DELETE(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while deleting service list",
+      error: "internal server error",
     });
   }
 }

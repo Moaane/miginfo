@@ -1,0 +1,14 @@
+{
+    "build": {
+      "env": {
+        "HOOKS_URL": "https://api.vercel.com/v1/integrations/deploy/prj_wUsqu2jmu7a6Irm6U3jrm9DStIpk/63LlT0PwOJ"
+      }
+    },
+    "hooks": [
+      {
+        "type": "prebuild",
+        "command": "pnpm prisma generate"
+      }
+    ]
+  }
+  

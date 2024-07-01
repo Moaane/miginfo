@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import SessionWrapper from "@/context/Provider";
 import { cn } from "@/lib/utils";
 import { Toaster } from "react-hot-toast";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const AdobeClean = localFont({
   src: [
@@ -49,6 +50,7 @@ export default function RootLayout({ children }) {
       <body className={cn("bg-white", AdobeClean.className)}>
         <SessionWrapper>
           {children}
+          <SpeedInsights />
           <Toaster position="bottom-right" />
         </SessionWrapper>
       </body>

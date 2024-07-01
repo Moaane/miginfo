@@ -41,12 +41,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export default function AboutPageMenu({
-  data,
-  meta,
-  onPageChange,
-  onDelete,
-}) {
+export default function AboutPageMenu({ data, meta, onPageChange, onDelete }) {
   const [id, setId] = useState(null);
 
   const handlePageChange = (page) => {
@@ -93,9 +88,7 @@ export default function AboutPageMenu({
                       {prop.direction}
                     </TableCell>
                     <TableCell className="font-medium">
-                      <Badge
-                        variant={prop.head ? "default" : "destructive"}
-                      >
+                      <Badge variant={prop.head ? "default" : "destructive"}>
                         {prop.head ? "Yes" : "No"}
                       </Badge>
                     </TableCell>
@@ -104,7 +97,7 @@ export default function AboutPageMenu({
                         alt={prop.image.name}
                         className="aspect-square rounded-md object-cover"
                         height="64"
-                        src={`/api/images/${prop.image.filename}`}
+                        src={prop.image.url}
                         width="64"
                       />
                     </TableCell>

@@ -1,17 +1,13 @@
 import prisma from "@/utils/db";
-import { getServerSession } from "next-auth";
-import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
-import { authOptions } from "../../auth/[...nextauth]/route";
-import { CreateImage } from "../../images/route";
-import { updateImage } from "../../images/[filename]/route";
+import { CreateImage, DeleteImage, UpdateImage } from "../../images/route";
 
 export async function GET(req, { params }) {
   const { id } = params;
 
   try {
     const service = await prisma.service.findUnique({
-      where: { id },
+      where: { id: id },
       include: {
         serviceCategories: {
           include: { categories: { select: { name: true } } },
@@ -27,7 +23,7 @@ export async function GET(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Failed while getting service",
+      error: "Failed while getting service",
     });
   }
 }
@@ -36,25 +32,25 @@ export async function PUT(req, { params }) {
   const { id } = params;
   const formData = await req.formData();
   const name = formData.get("title");
-  const slug = formData.get("slug");
+  const slug = formData.get("slug").toLowerCase().replace(/\s+/g, "-");
   const description = formData.get("description");
   const categoryId = formData.get("category");
   const onSection = formData.get("onSection") === "true";
   const status = formData.get("status") === "true";
   const image = formData.get("image");
   const icon = formData.get("icon");
-  let imageName = formData.get("imageName");
+  const imageName = formData.get("imageName");
   const iconName = `${imageName}-icon`;
 
   try {
     const existingService = await prisma.service.findUnique({
-      where: { slug },
+      where: { slug: slug },
     });
 
     if (existingService && existingService.id !== id) {
       return NextResponse.json({
         status: 400,
-        message: "Slug is already in use",
+        error: "Slug is already in use",
       });
     }
 
@@ -71,24 +67,16 @@ export async function PUT(req, { params }) {
     const imageData =
       image && image instanceof Blob
         ? existingService.image
-          ? await updateImage(existingService.image.filename, image, imageName)
+          ? await UpdateImage(existingService.image.url, image, imageName)
           : await CreateImage(image, imageName)
-        : existingService.image
-        ? imageName !== existingService.image.name
-          ? await renameImage(existingService.image.filename, imageName)
-          : existingService.image
-        : null;
+        : existingService.image;
 
     const iconData =
       icon && icon instanceof Blob
         ? existingService.icon
-          ? await updateImage(existingService.icon.filename, icon, iconName)
+          ? await UpdateImage(existingService.icon.url, icon, iconName)
           : await CreateImage(icon, iconName)
-        : existingService.icon
-        ? iconName !== existingService.icon.name
-          ? await renameImage(existingService.icon.filename, iconName)
-          : existingService.icon
-        : null;
+        : existingService.icon;
 
     const updatedService = await prisma.service.update({
       where: { id: id },
@@ -115,51 +103,39 @@ export async function PUT(req, { params }) {
     console.error("Error updating service:", error);
     return NextResponse.json({
       status: 500,
-      message: "Error while updating service",
+      error: "Error while updating service",
     });
   }
 }
 
 export async function DELETE(req, { params }) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  // const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  // if (!token) {
+  //   return NextResponse.json({
+  //     status: 401,
+  //     message: "Unauthorized to delete service",
+  //   });
+  // }
+
+  // const session = await getServerSession(authOptions);
+  // if (!session) {
+  //   return NextResponse.json({
+  //     status: 401,
+  //     message: "Unauthorized to delete service",
+  //   });
+  // }
 
   const { id } = params;
 
-  if (!token) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to delete service",
-    });
-  }
-
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized to delete service",
-    });
-  }
-
   try {
-    const deleteImage = async (oldFilename) => {
-      await fetch(`${process.env.BASE_URL}/api/images/${oldFilename}`, {
-        method: "DELETE",
-      });
-    };
+    const deletedService = await prisma.service.delete({ where: { id: id } });
 
-    const deletedService = await prisma.service.delete({ where: { id } });
-    const deletedLists = await prisma.serviceList.deleteMany({
+    await prisma.serviceList.deleteMany({
       where: { serviceId: deletedService.id },
     });
 
-    if (deletedService.icon) {
-      await deleteImage(deletedService.icon.filename);
-    }
-
-    if (deletedService.image) {
-      await deleteImage(deletedService.image.filename);
-    }
+    deletedService.image ? await DeleteImage(deletedService.image.url) : null;
+    deletedService.icon ? await DeleteImage(deletedService.icon.url) : null;
 
     return NextResponse.json({
       status: 200,
@@ -168,7 +144,7 @@ export async function DELETE(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while deleting service",
+      error: "internal server error",
     });
   }
 }

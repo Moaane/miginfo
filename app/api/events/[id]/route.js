@@ -1,12 +1,7 @@
 import prisma from "@/utils/db";
 import { NextResponse } from "next/server";
-import {
-  deleteImage,
-  renameImage,
-  updateImage,
-} from "../../images/[filename]/route";
 import { getToken } from "next-auth/jwt";
-import { CreateImage } from "../../images/route";
+import { CreateImage, DeleteImage, UpdateImage } from "../../images/route";
 
 export async function GET(req, { params }) {
   const { id } = params;
@@ -21,6 +16,13 @@ export async function GET(req, { params }) {
       },
     });
 
+    if (!event) {
+      return NextResponse.json({
+        status: 404,
+        error: "event not found",
+      });
+    }
+
     return NextResponse.json({
       data: event,
       status: 200,
@@ -29,7 +31,7 @@ export async function GET(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Failed while fething event",
+      error: "Failed while fething event",
     });
   }
 }
@@ -47,13 +49,16 @@ export async function PUT(req, { params }) {
   const { id } = params;
   const formData = await req.formData();
   const title = formData.get("title");
-  let slug = formData.get("slug");
+  const slug = (formData.get("slug") || title)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
   const description = formData.get("description");
   const categoryId = formData.get("category");
   const image = formData.get("image");
-  let imageName = formData.get("imageName");
+  const imageName = (formData.get("imageName") || title)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
   const userId = token.sub;
-  slug = slug || title.toLowerCase().replace(/\s+/g, "-");
 
   try {
     const existingEvent = await prisma.news.findUnique({
@@ -63,7 +68,7 @@ export async function PUT(req, { params }) {
     if (existingEvent && existingEvent.id !== id) {
       return NextResponse.json({
         status: 400,
-        message: "Slug already been used",
+        error: "Slug already been used",
       });
     }
 
@@ -82,13 +87,9 @@ export async function PUT(req, { params }) {
     const imageData =
       image && image instanceof Blob
         ? event.image
-          ? await updateImage(event.image.filename, image, imageName)
+          ? await UpdateImage(event.image.url, image, imageName)
           : await CreateImage(image, imageName)
-        : event.image
-        ? imageName !== event.image.name
-          ? await renameImage(event.image.filename, imageName)
-          : event.image
-        : null;
+        : event.image;
 
     const updatedEvent = await prisma.news.update({
       where: { id },
@@ -119,7 +120,7 @@ export async function PUT(req, { params }) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while updating news",
+      error: "Error while updating news",
     });
   }
 }
@@ -130,7 +131,7 @@ export async function DELETE(req, { params }) {
   try {
     const deletedEvent = await prisma.news.delete({ where: { id } });
 
-    deletedEvent.image ? await deleteImage(deletedEvent.image.filename) : null;
+    deletedEvent.image ? await DeleteImage(deletedEvent.image.url) : null;
 
     return NextResponse.json({
       status: 200,
@@ -139,7 +140,7 @@ export async function DELETE(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Failed while fething service",
+      error: "Failed while fething service",
     });
   }
 }

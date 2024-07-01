@@ -52,8 +52,8 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="hidden lg:flex sticky top-0 z-[51] bg-red-100 dark:bg-gray-950">
-        <div className="container max-w-7xl bg-red-200">
+      <nav className="hidden lg:flex sticky top-0 bg-white z-[51] dark:bg-gray-950">
+        <div className="container max-w-7xl">
           <div className="flex py-8 items-center">
             <Link
               className="mr-auto flex items-center gap-2 text-lg font-semibold"

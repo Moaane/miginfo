@@ -41,6 +41,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
 
 export default function ServiceMenu({ data, meta, onPageChange, onDelete }) {
   const [id, setId] = useState(null);
@@ -98,8 +99,10 @@ export default function ServiceMenu({ data, meta, onPageChange, onDelete }) {
                     <TableCell className="font-medium">
                       {index + 1 + (meta.currentPage - 1) * meta.perPage}
                     </TableCell>
-                    <TableCell className="font-medium">{prop.name}</TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    <TableCell className="font-medium line-clamp-1">
+                      {prop.name}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell line-clamp-1">
                       {prop.description}
                     </TableCell>
                     <TableCell className="font-medium">{prop.slug}</TableCell>
@@ -112,7 +115,7 @@ export default function ServiceMenu({ data, meta, onPageChange, onDelete }) {
                     </TableCell>
                     <TableCell>
                       <Badge variant={prop.status ? "success" : "destructive"}>
-                        {prop.status ? "Pusblished" : "Not Published"}
+                        {prop.status ? "Yes" : "No"}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-medium">
@@ -121,24 +124,24 @@ export default function ServiceMenu({ data, meta, onPageChange, onDelete }) {
 
                     <TableCell className="hidden sm:table-cell">
                       <Image
-                        alt={prop.icon.name}
+                        alt={prop.icon.pathname}
                         className="aspect-square rounded-md object-cover"
                         height="64"
-                        src={`/api/images/${prop.icon.filename}`}
+                        src={prop.icon.url}
                         width="64"
                       />
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       <Image
-                        alt={prop.image.name}
+                        alt={prop.image.pathname}
                         className="aspect-square rounded-md object-cover"
                         height="64"
-                        src={`/api/images/${prop.image.filename}`}
+                        src={prop.image.url}
                         width="64"
                       />
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {prop.createdAt}
+                      {format(prop.createdAt, "dd-MM-yyyy")}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>

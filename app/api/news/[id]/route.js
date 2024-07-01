@@ -1,7 +1,6 @@
 import prisma from "@/utils/db";
 import { NextResponse } from "next/server";
-import { CreateImage } from "../../images/route";
-import { deleteImage, renameImage } from "../../images/[filename]/route";
+import { CreateImage, DeleteImage } from "../../images/route";
 import { getToken } from "next-auth/jwt";
 
 export async function GET(req, { params }) {
@@ -25,7 +24,7 @@ export async function GET(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while getting news",
+      error: "Error while getting news",
     });
   }
 }
@@ -41,15 +40,15 @@ export async function PUT(req, { params }) {
   }
 
   const { id } = params;
-
   const formData = await req.formData();
   const title = formData.get("title");
-  let slug = formData.get("slug");
+  const slug = formData.get("slug");
   const description = formData.get("description");
   const categoryId = formData.get("category");
   const image = formData.get("image");
-  let imageName = formData.get("imageName");
-  slug = slug.toLowerCase().replace(/\s+/g, "-");
+  const imageName = (formData.get("imageName") || title)
+    .toLowerCase()
+    .replace(/\s+/g, "-");
   const userId = token.sub;
 
   try {
@@ -60,7 +59,7 @@ export async function PUT(req, { params }) {
     if (existingSlug && existingSlug.id !== id) {
       return NextResponse.json({
         status: 400,
-        message: "Slug already been used",
+        error: "Slug already been used",
       });
     }
 
@@ -78,9 +77,7 @@ export async function PUT(req, { params }) {
 
     const imageData =
       image && image instanceof Blob
-        ? (await CreateImage(image, imageName))
-          ? imageName !== news.image.name
-          : await renameImage(news.image.filename, imageName)
+        ? await CreateImage(image, imageName)
         : news.image;
 
     const updatedNews = await prisma.news.update({
@@ -112,7 +109,7 @@ export async function PUT(req, { params }) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while updating news",
+      error: "Error while updating news",
     });
   }
 }
@@ -123,7 +120,7 @@ export async function DELETE(req, { params }) {
   try {
     const deletedNews = await prisma.news.delete({ where: { id } });
 
-    deletedNews.image ? await deleteImage(deletedNews.image.filename) : null;
+    deletedNews.image ? await DeleteImage(deletedNews.image.url) : null;
 
     return NextResponse.json({
       status: 200,
@@ -132,7 +129,7 @@ export async function DELETE(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Failed while deleting news",
+      error: "Failed while deleting news",
     });
   }
 }

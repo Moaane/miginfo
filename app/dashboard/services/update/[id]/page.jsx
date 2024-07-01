@@ -132,7 +132,6 @@ export default function page({ params }) {
       if (result.status === 200) {
         router.back();
       }
-
     } catch (error) {
       console.log("Error while creating service : ", error);
     } finally {
@@ -159,10 +158,10 @@ export default function page({ params }) {
       if (categoryId) form.setValue("category", categoryId);
       form.setValue("status", result.data.status);
       form.setValue("onSection", result.data.onSection);
-      form.setValue("imageName", result.data.image.name);
+      form.setValue("imageName", result.data.image.pathname);
 
-      setPreivewIconUrl(result.data.icon.filename);
-      setPreviewUrl(result.data.image.filename);
+      setPreivewIconUrl(result.data.icon.url);
+      setPreviewUrl(result.data.image.url);
       fetchCategories(categoryId);
     } catch (error) {
       console.log("Error while getting service : ", error);
@@ -479,7 +478,7 @@ export default function page({ params }) {
                                     updatedPreviewIconUrl
                                       ? updatedPreviewIconUrl
                                       : previewIconUrl
-                                      ? `/api/images/${previewIconUrl}`
+                                      ? previewIconUrl
                                       : "/img_holder.png"
                                   }
                                   width="300"
@@ -524,7 +523,9 @@ export default function page({ params }) {
                                   src={
                                     updatedPreviewUrl
                                       ? updatedPreviewUrl
-                                      : `/api/images/${previewUrl}`
+                                      : previewUrl
+                                      ? previewUrl
+                                      : "/img_holder.png"
                                   }
                                   width="300"
                                   priority

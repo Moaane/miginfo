@@ -41,7 +41,6 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function NewsMenu({ data, meta, onPageChange, onDelete }) {
-  console.log(data);
   const [id, setId] = useState(null);
 
   const handlePageChange = (page) => {
@@ -88,7 +87,7 @@ export default function NewsMenu({ data, meta, onPageChange, onDelete }) {
                     <TableCell className="font-medium">
                       <p className="line-clamp-1">{prop.title}</p>
                     </TableCell>
-                    <TableCell className="font-medium line-clamp-3">
+                    <TableCell className="font-medium">
                       <p className="line-clamp-1">{prop.slug}</p>
                     </TableCell>
                     <TableCell className="font-medium">
@@ -99,7 +98,7 @@ export default function NewsMenu({ data, meta, onPageChange, onDelete }) {
                         alt="Product image"
                         className="aspect-square rounded-md object-contain"
                         height="64"
-                        src={`/api/images/${prop.image.filename}`}
+                        src={prop.image.url}
                         width="64"
                       />
                     </TableCell>

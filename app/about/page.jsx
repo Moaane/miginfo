@@ -68,7 +68,9 @@ export default function page() {
               data-aos-delay={`${index * 250}`}
               data-aos-duration={`${750 / index}`}
               className={`flex w-full flex-col gap-x-12 ${
-                data.direction === "RIGHT" ? "md:flex-row-reverse" : "md:flex-row"
+                data.direction === "RIGHT"
+                  ? "md:flex-row-reverse"
+                  : "md:flex-row"
               } text-black space-y-4`}
             >
               <div className="md:w-1/2 h-full flex flex-col justify-center md:pt-12">
@@ -89,7 +91,7 @@ export default function page() {
                 <Image
                   width={300}
                   height={300}
-                  src={`/api/images/${data.image.filename}`}
+                  src={data.image.url}
                   className="max-w-64 md:max-w-sm max-h-40 md:max-h-52 lg:max-w-md lg:max-h-64 2xl:max-w-lg w-full rounded-xl shadow-2xl object-cover"
                 />
               </div>
@@ -121,7 +123,7 @@ export default function page() {
                     <Image
                       height={160}
                       width={160}
-                      src={`/api/images/${team.image.filename}`}
+                      src={team.image.url}
                       alt={team.image.name}
                       className="w-40 h-40 rounded-xl"
                     />

@@ -2,95 +2,38 @@ import { NextResponse } from "next/server";
 import path from "path";
 import mime from "mime-types";
 import { readdir, writeFile } from "fs/promises";
+import { del, put } from "@vercel/blob";
 
-const UPLOAD_DIR = path.resolve("./public");
+export async function CreateImage(image, filename) {
+  const blob = await put(filename, image, {
+    access: "public",
+  });
 
-export async function CreateImage(image, imageName) {
+  return blob;
+}
+
+export async function UpdateImage(urlToDelete, image, filename) {
   try {
-    if (!image || !image instanceof Blob) {
-      return NextResponse.json({ status: 400, message: "No image provided" });
-    }
+    await del(urlToDelete);
+    const newImage = await put(filename, image, {
+      access: "public",
+    });
 
-    if (!imageName) {
-      return NextResponse.json({
-        status: 400,
-        message: "No image name or title provided",
-      });
-    }
-
-    const buffer = Buffer.from(await image.arrayBuffer());
-    const extension = mime.extension(image.type);
-    const sanitizedName = imageName
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9\-]/g, "");
-    const filename = `${sanitizedName}.${extension}`;
-    const filePath = path.join(UPLOAD_DIR, filename);
-
-    const files = await readdir(UPLOAD_DIR);
-    if (files.includes(filePath)) {
-      return NextResponse.json({
-        status: 400,
-        message: "Image with that name already exist",
-      });
-    }
-
-    await writeFile(filePath, buffer);
-    return { filename: filename, name: imageName };
+    return newImage;
   } catch (error) {
     console.log(error);
-    return NextResponse.json({
-      status: 500,
-      message: "Error while uploading image",
-    });
+    return NextResponse.json({ status: 500, error: "Error updating image" });
   }
 }
 
-export async function POST(req) {
-  const formData = await req.formData();
-  const image = formData.get("image");
-  const imageName = formData.get("imageName");
-
+export async function DeleteImage(urlToDelete) {
   try {
-    if (!image || !image instanceof Blob) {
-      return NextResponse.json({ status: 400, message: "No image provided" });
-    }
-
-    if (!imageName) {
-      return NextResponse.json({
-        status: 400,
-        message: "No image name or title provided",
-      });
-    }
-
-    const buffer = Buffer.from(await image.arrayBuffer());
-    const extension = mime.extension(image.type);
-    const sanitizedName = imageName
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9\-]/g, "");
-    const filename = `${sanitizedName}.${extension}`;
-    const filePath = path.join(UPLOAD_DIR, filename);
-
-    const files = await readdir(UPLOAD_DIR);
-    if (files.includes(filePath)) {
-      return NextResponse.json({
-        status: 400,
-        message: "Image with that name already exist",
-      });
-    }
-
-    await writeFile(filePath, buffer);
+    await del(urlToDelete);
     return NextResponse.json({
-      data: { filename: filename, name: imageName },
-      status: 201,
-      message: "Image uploaded successfully",
+      status: 200,
+      message: "Image deleted successfully",
     });
   } catch (error) {
-    console.log(error);
-    return NextResponse.json({
-      status: 500,
-      message: "Error while uploading image",
-    });
+    return NextResponse.json({ status: 500, error: "Error deleting image" });
   }
 }

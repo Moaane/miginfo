@@ -9,7 +9,7 @@ export async function GET(req, { params }) {
     if (!feature) {
       return NextResponse.json({
         status: 404,
-        message: "Feature not found",
+        error: "Feature not found",
       });
     }
 
@@ -22,7 +22,7 @@ export async function GET(req, { params }) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while retrieving feature",
+      error: "Error while retrieving feature",
     });
   }
 }
@@ -60,7 +60,7 @@ export async function PUT(req, { params }) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while updating feature",
+      error: "Error while updating feature",
     });
   }
 }
@@ -79,7 +79,7 @@ export async function DELETE(req, { params }) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while deleting feature",
+      error: "Error while deleting feature",
     });
   }
 }

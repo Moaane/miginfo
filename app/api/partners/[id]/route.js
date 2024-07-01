@@ -1,24 +1,23 @@
 import prisma from "@/utils/db";
 import { NextResponse } from "next/server";
-import {
-  deleteImage,
-  renameImage,
-  updateImage,
-} from "../../images/[filename]/route";
-import { CreateImage } from "../../images/route";
+import { CreateImage, DeleteImage, UpdateImage } from "../../images/route";
 
 export async function GET(req, { params }) {
   const { id } = params;
 
   try {
     const partner = await prisma.partner.findUnique({
-      where: { id },
+      where: { id: id },
       include: {
         partnerCategories: {
           include: { categories: { select: { name: true } } },
         },
       },
     });
+
+    if (!partner) {
+      return NextResponse.json({ status: 404, error: "partner not found" });
+    }
 
     return NextResponse.json({
       data: partner,
@@ -28,19 +27,21 @@ export async function GET(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Failed while getting partner",
+      error: "internal server error",
     });
   }
 }
 
 export async function PUT(req, { params }) {
   const { id } = params;
-
   const formData = await req.formData();
   const name = formData.get("name");
   const categoryId = formData.get("category");
   const image = formData.get("image");
-  let imageName = formData.get("imageName");
+  const imageName = formData
+    .get("imageName")
+    .toLowerCase()
+    .replace(/\s+/g, "-");
 
   try {
     const partnerCategories = await prisma.partnerCategory.findFirst({
@@ -55,54 +56,40 @@ export async function PUT(req, { params }) {
 
     const partner = await prisma.partner.findUnique({ where: { id: id } });
 
-    console.log(image);
-
     const imageData =
       image && image instanceof Blob
         ? partner.image
-          ? await updateImage(partner.image.filename, image, imageName)
+          ? await UpdateImage(partner.image.url, image, imageName)
           : await CreateImage(image, imageName)
-        : partner.image
-        ? imageName !== partner.image.name
-          ? await renameImage(partner.image.filename, imageName)
-          : partner.image
-        : null;
+        : partner.image;
 
-    if (imageData && imageData.filename) {
-      const updatedPartner = await prisma.partner.update({
-        where: { id },
-        data: {
-          name: name,
-          image: imageData,
-          partnerCategories: {
-            updateMany: {
-              where: { partnerId: id },
-              data: { categoryId: categoryId },
-            },
+    const updatedPartner = await prisma.partner.update({
+      where: { id },
+      data: {
+        name: name,
+        image: imageData,
+        partnerCategories: {
+          updateMany: {
+            where: { partnerId: id },
+            data: { categoryId: categoryId },
           },
         },
-        include: {
-          partnerCategories: true,
-        },
-      });
+      },
+      include: {
+        partnerCategories: true,
+      },
+    });
 
-      return NextResponse.json({
-        data: updatedPartner,
-        status: 200,
-        message: "Partner updated successfully",
-      });
-    } else {
-      const result = await imageData.json();
-      return NextResponse.json({
-        status: result.status,
-        message: result.message,
-      });
-    }
+    return NextResponse.json({
+      data: updatedPartner,
+      status: 200,
+      message: "Partner updated successfully",
+    });
   } catch (error) {
     console.log(error);
     return NextResponse.json({
       status: 500,
-      message: "Error while updating partner",
+      error: "internal server error",
     });
   }
 }
@@ -113,9 +100,7 @@ export async function DELETE(req, { params }) {
   try {
     const deletedPartner = await prisma.partner.delete({ where: { id } });
 
-    deletedPartner.image
-      ? await deleteImage(deletedPartner.image.filename)
-      : null;
+    deletedPartner.image ? await DeleteImage(deletedPartner.image.url) : null;
 
     return NextResponse.json({
       status: 200,
@@ -124,7 +109,7 @@ export async function DELETE(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Failed while deleting partner",
+      error: "internal server error",
     });
   }
 }

@@ -4,7 +4,7 @@ import {
   deleteImage,
   renameImage,
   updateImage,
-} from "../../images/[filename]/route";
+} from "../../images/[url]/route";
 import { CreateImage } from "../../images/route";
 
 export async function GET(req, { params }) {

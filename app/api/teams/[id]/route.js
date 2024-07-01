@@ -1,11 +1,6 @@
 import prisma from "@/utils/db";
 import { NextResponse } from "next/server";
-import {
-  deleteImage,
-  renameImage,
-  updateImage,
-} from "../../images/[filename]/route";
-import { CreateImage } from "../../images/route";
+import { CreateImage, DeleteImage, UpdateImage } from "../../images/route";
 
 export async function GET(req, { params }) {
   const { id } = params;
@@ -15,9 +10,10 @@ export async function GET(req, { params }) {
     if (!team) {
       return NextResponse.json({
         status: 404,
-        message: "Team not found",
+        error: "Team not found",
       });
     }
+
     return NextResponse.json({
       data: team,
       status: 200,
@@ -26,23 +22,23 @@ export async function GET(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while retrieve team",
+      error: "Error while retrieve team",
     });
   }
 }
 
 export async function PUT(req, { params }) {
   const { id } = params;
-  try {
-    const formData = await req.formData();
-    const name = formData.get("name");
-    const position = formData.get("position");
-    const twitter = formData.get("twitter");
-    const facebook = formData.get("facebook");
-    const email = formData.get("email");
-    const linkedin = formData.get("linkedin");
-    const image = formData.get("image");
+  const formData = await req.formData();
+  const name = formData.get("name");
+  const position = formData.get("position");
+  const twitter = formData.get("twitter");
+  const facebook = formData.get("facebook");
+  const email = formData.get("email");
+  const linkedin = formData.get("linkedin");
+  const image = formData.get("image");
 
+  try {
     const team = await prisma.team.findUnique({ where: { id: id } });
 
     if (!team) {
@@ -52,17 +48,11 @@ export async function PUT(req, { params }) {
       });
     }
 
-    console.log(image);
-
     const imageData =
       image && image instanceof Blob
         ? team.image
-          ? await updateImage(team.image.filename, image, name)
+          ? await UpdateImage(team.image.url, image, name)
           : await CreateImage(image, name)
-        : team.image
-        ? name !== team.image.name
-          ? await renameImage(team.image.filename, name)
-          : team.image
         : team.image;
 
     const updatedTeam = await prisma.team.update({
@@ -86,7 +76,7 @@ export async function PUT(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while updating image",
+      error: "Error while updating image",
     });
   }
 }
@@ -96,7 +86,7 @@ export async function DELETE(req, { params }) {
   try {
     const deletedTeam = await prisma.team.delete({ where: { id: id } });
 
-    deletedTeam.image ? await deleteImage(deletedTeam.image.filename) : null;
+    deletedTeam.image ? await DeleteImage(deletedTeam.image.url) : null;
 
     return NextResponse.json({
       status: 200,
@@ -105,7 +95,7 @@ export async function DELETE(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while deleting team",
+      error: "Error while deleting team",
     });
   }
 }

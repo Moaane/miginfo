@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { deleteImage } from "../../images/[filename]/route";
+import { deleteImage } from "../../images/[url]/route";
 import prisma from "@/utils/db";
 
 export async function GET(req, { params }) {
@@ -32,13 +32,9 @@ export async function GET(req, { params }) {
 export async function DELETE(req, { params }) {
   const { id } = params;
   try {
-    const deletedApplication = await prisma.application.delete({
+    await prisma.application.delete({
       where: { id: id },
     });
-
-    if (deletedApplication.resume) {
-      await deleteImage(deletedApplication.resume.filename);
-    }
 
     return NextResponse.json({
       status: 200,

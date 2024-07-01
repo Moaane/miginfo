@@ -16,7 +16,7 @@ export async function GET(req, { params }) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Error while retrieving service",
+      error: "Error while retrieving service",
     });
   }
 }
