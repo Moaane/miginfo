@@ -89,7 +89,6 @@ export default function page() {
     setLoading(true);
     try {
       const formData = new FormData();
-      console.log(data);
       formData.append("title", data.title);
       formData.append("slug", data.slug);
       formData.append("description", data.description);
@@ -108,7 +107,7 @@ export default function page() {
         router.back();
       }
     } catch (error) {
-      console.log("Error while creating news : ", error);
+      console.error ("Error while creating news : ", error);
     } finally {
       setLoading(false);
     }
@@ -268,12 +267,12 @@ export default function page() {
                         </div>
                       </CardContent>
                     </Card>
-                    <Card className="bg-red-200" x-chunk="dashboard-07-chunk-2">
+                    <Card x-chunk="dashboard-07-chunk-2">
                       <CardHeader>
                         <CardTitle>Content</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="max-w-screen-sm bg-red-100">
+                        <div className="max-w-screen-sm">
                           <div className="grid gap-3">
                             <FormField
                               control={form.control}

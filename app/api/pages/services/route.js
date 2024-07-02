@@ -3,21 +3,17 @@ import { NextResponse } from "next/server";
 import { CreateImage } from "../../images/route";
 
 export async function GET(req) {
-  const url = new URL(req.url);
-  const searchParams = new URLSearchParams(url.searchParams);
+  const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page"), 10);
-  const skip = (page - 1) * 10;
 
   try {
     if (page) {
+      const skip = page > 0 ? 10 * (page - 1) : 0;
       const [data, total] = await Promise.all([
         prisma.servicePage.findMany({
           skip: skip,
           take: 10,
-          orderBy: [
-            { head: "desc" }, // Untuk menempatkan yang `true` di atas
-            { title: "asc" }, // Kemudian mengurutkan berdasarkan `title` secara ascending
-          ],
+          orderBy: [{ head: "desc" }, { title: "asc" }],
         }),
         prisma.servicePage.count(),
       ]);
@@ -37,20 +33,17 @@ export async function GET(req) {
         status: 200,
         message: "Services retrieved successfully",
       });
-    } else {
-      const servicePages = await prisma.servicePage.findMany({
-        orderBy: [
-          { head: "desc" }, // Untuk menempatkan yang `true` di atas
-          { title: "asc" }, // Kemudian mengurutkan berdasarkan `title` secara ascending
-        ],
-      });
-
-      return NextResponse.json({
-        data: servicePages,
-        status: 200,
-        message: "Service pages retrieved successfully",
-      });
     }
+
+    const servicePages = await prisma.servicePage.findMany({
+      orderBy: [{ head: "desc" }, { title: "asc" }],
+    });
+
+    return NextResponse.json({
+      data: servicePages,
+      status: 200,
+      message: "Service pages retrieved successfully",
+    });
   } catch (error) {
     console.log(error);
     return NextResponse.json({

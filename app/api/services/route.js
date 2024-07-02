@@ -3,14 +3,12 @@ import prisma from "@/utils/db";
 import { CreateImage } from "../images/route";
 
 export async function GET(req) {
-  const url = new URL(req.url);
-  const searchParams = new URLSearchParams(url.searchParams);
+  const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page"), 10) || 1;
   const filter = searchParams.get("filter");
-  const skip = (page - 1) * 10;
 
   const whereClause =
-    filter === "onSection"
+    filter === "section"
       ? { onSection: true }
       : filter === "published"
       ? { status: true }
@@ -18,6 +16,7 @@ export async function GET(req) {
 
   try {
     if (page) {
+      const skip = (page - 1) * 10;
       const [data, total] = await Promise.all([
         prisma.service.findMany({
           where: whereClause,
@@ -37,28 +36,28 @@ export async function GET(req) {
 
       return NextResponse.json({
         meta: {
-          total,
-          lastPage,
+          total: total,
+          lastPage: lastPage,
           currentPage: page,
           perPage: 10,
           prev: page > 1 ? page - 1 : null,
           next: page < lastPage ? page + 1 : null,
         },
-        data,
-        status: 200,
-        message: "Services retrieved successfully",
-      });
-    } else {
-      const services = await prisma.service.findMany({
-        select: { name: true, slug: true, id: true },
-      });
-
-      return NextResponse.json({
-        data: services,
+        data: data,
         status: 200,
         message: "Services retrieved successfully",
       });
     }
+
+    const services = await prisma.service.findMany({
+      select: { name: true, slug: true, id: true },
+    });
+
+    return NextResponse.json({
+      data: services,
+      status: 200,
+      message: "Services retrieved successfully",
+    });
   } catch (error) {
     return NextResponse.json({
       status: 500,

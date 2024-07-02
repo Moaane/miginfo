@@ -14,13 +14,6 @@ import { ChevronDown } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Button } from "../ui/button";
 import { Menu } from "lucide-react";
-import { Home } from "lucide-react";
-import { HandHeart } from "lucide-react";
-import { Boxes } from "lucide-react";
-import { Newspaper } from "lucide-react";
-import { Ticket } from "lucide-react";
-import { User } from "lucide-react";
-import { Handshake } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Collapsible,
@@ -52,9 +45,9 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="hidden lg:flex sticky top-0 z-[51] bg-red-100 dark:bg-gray-950">
-        <div className="container max-w-7xl bg-red-200">
-          <div className="flex py-8 items-center">
+      <nav className="hidden lg:flex sticky top-0 z-[51] bg-white dark:bg-gray-950">
+        <div className="container flex w-full max-w-7xl h-[10vh]">
+          <div className="flex items-center w-full">
             <Link
               className="mr-auto flex items-center gap-2 text-lg font-semibold"
               href="/"
@@ -139,8 +132,9 @@ function DropdownMenuComponent({ pathname }) {
 
   async function fetchServiceLinks() {
     try {
-      const response = await fetch("/api/pages/services/nav", {
+      const response = await fetch("/api/pages/services", {
         method: "GET",
+        cache: "no-store",
       });
       const result = await response.json();
       setServiceLinks(result.data);

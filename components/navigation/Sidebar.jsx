@@ -52,6 +52,7 @@ import { Boxes } from "lucide-react";
 import { GalleryThumbnails } from "lucide-react";
 import { ChevronDown } from "lucide-react";
 import { Layers } from "lucide-react";
+import { FileCog } from "lucide-react";
 
 const variantButton = {
   full: {
@@ -206,6 +207,17 @@ export default function Sidebar({ children }) {
                 Carousels
               </Link>
               <Link
+                href="/dashboard/features"
+                className={
+                  pathname.startsWith("/dashboard/features")
+                    ? variantButton.full.active
+                    : variantButton.full.default
+                }
+              >
+                <FileCog className="h-4 w-4" />
+                Features
+              </Link>
+              <Link
                 href="/dashboard/teams"
                 className={
                   pathname.startsWith("/dashboard/teams")
@@ -230,7 +242,7 @@ export default function Sidebar({ children }) {
                     <ChevronDown className="h-4 w-4" />
                   </div>
                 </CollapsibleTrigger>
-                <CollapsibleContent>
+                <CollapsibleContent className="pl-2">
                   <Link
                     href="/dashboard/pages/about"
                     className={
